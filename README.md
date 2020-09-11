@@ -1,8 +1,6 @@
-This repository contains several workflows for NGS data. There is a workflow for
-the analysis of MiSeq or NextSeq Data and a seperate workflow for the
-analysis of Illumina Infinimum GSA microarray data
+# This repository contains several workflows for NGS data. There is a workflow for the analysis of MiSeq or NextSeq Data and a seperate workflow for the analysis of Illumina Infinimum GSA microarray data
 
-DNA microarray Analysis Steps:
+## DNA microarray Analysis Steps:
 1) Convert IDAT to GTC
 2) Convert GTC to VCF
 3) Annotate variants
@@ -14,7 +12,7 @@ DNA microarray Analysis Steps:
 9) Extract final tables
 10) Generate MoChA call plots
 
-Targeted sequencing Analysis Steps:
+## Targeted sequencing Analysis Steps:
 1) Align data (BWA)
 2) Remove duplicates
 3) Recalibrate base pairs
