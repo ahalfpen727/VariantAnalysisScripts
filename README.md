@@ -1,6 +1,6 @@
-# This repository contains several NGS data analysis workflows bifurcated across two directories.
+# This repository contains several NGS data analysis workflows
 
-The DNA microarray analysis workflow is designed to analyze Illumina Infinimum GSA microarray data from several input directories. The targeted sequencing workflow is designed for the analysis of MiSeq and NextSeq Data.
+The workflows are bifurcated across two main directories.The DNA microarray analysis workflow is designed to analyze Illumina Infinimum GSA microarray data from several input directories. The targeted sequencing workflow is designed for the analysis of MiSeq and NextSeq Data.
 
 ## DNA microarray Analysis Steps:
 1) Convert IDAT to GTC
