@@ -1,0 +1,346 @@
+declare -A dirs=( ["20180117"]="2018_07" ["20200110"]="2020_01" ["20200302"]="2020_03" ["20200319"]="2020_04" ["20200320"]="2020_05" )
+declare	-A bpms=( ["20180117"]="GSA-24v1-0_A2.bpm" ["20200110"]="GSA-24v2-0_A2.bpm" ["20200302"]="GSA-24v2-0_A2.bpm"
+                  ["20200319"]="GSA-24v2-0_A2.bpm" ["20200320"]="CCPMBiobankMEGA2_20002558X345183_A1.bpm" )
+declare -A egts=( ["20180117"]="GSA-24v1-0_A1_ClusterFile.egt" ["20200110"]="GSA-24v2-0_A1_ClusterFile.egt"
+                  ["20200302"]="GSA-24v2-0_A1_ClusterFile.egt" ["20200319"]="GSA-24v2-0_A1_ClusterFile.egt"
+		  ["20200320"]="Copy of MEGAv2 validation 02-2019_KC.egt" )
+declare -A csvs=( ["20180117"]="GSA-24v1-0_A2.csv" ["20200110"]="GSA-24v2-0_A2.csv" ["20200302"]="GSA-24v2-0_A2.csv"
+                  ["20200319"]="GSA-24v2-0_A2.csv" ["20200320"]="CCPMBiobankMEGA2_20002558X345183_A1.csv" )
+declare -A sams=( ["20180117"]="" ["20200110"]="" ["20200302"]="" ["20200319"]="" ["20200320"]="CCPMBiobankMEGA2_20002558X345183_A1.bam" )
+declare -A opts=( ["20180117"]="" ["20200110"]="-s ^8033684100" ["20200302"]="" ["20200319"]="" ["20200320"]="" )
+
+for pfx in 20180117 20200110 20200302 20200319 20200320; do
+  cd ${dirs[$pfx]}
+  ...
+  cd ..
+done
+
+###########################################################################
+## CONVERT GSA DATA FROM IDAT TO GTC                                     ##
+###########################################################################
+
+raw="..."
+
+dir=${dirs["20180117"]}
+cd $dir
+unzip -j $raw/$dir/LifeVault_Data_Transfer_01172018.zip Data_Transfer_01172018/Raw_Data/202136030091/202136030091_R*C*_*.idat
+cd ..
+
+dir=${dirs["20200110"]}
+cd $dir
+for zip in $raw/$dir/203{408430041,408430049,408430052,408430054,533880001,533880004}\ idat.zip; do unzip "$zip"; done
+cd ..
+
+dir=${dirs["20200302"]}
+cd $dir
+for zip in $raw/$dir/2035338800{74,88}\ iDat.zip; do unzip "$zip"; done
+cd ..
+
+dir=${dirs["20200319"]}
+cd $dir
+for zip in $raw/$dir/2035338900{11,75}\ iDat.zip; do unzip "$zip"; done
+cd ..
+
+dir=${dirs["20200320"]}
+cd $dir
+unzip -j $raw/$dir/LifeVault.zip LifeVault/{202329440117/202329440117,202340640055/202340640055,202340640198/202340640198}_R*C*_*.idat
+cd ..
+
+cd ../../illumina/
+unzip -j $raw/${dirs["20200320"]}/LifeVault.zip LifeVault/{CCPMBiobankMEGA2_20002558X345183_A1.bpm,CCPMBiobankMEGA2_20002558X345183_A1.csv,"Copy of MEGAv2 validation 02-2019_KC.egt"}
+bcftools +gtc2vcf -c CCPMBiobankMEGA2_20002558X345183_A1.csv --fasta-flank | \
+  bwa mem -M GCA_000001405.15_GRCh38_no_alt_analysis_set.fna - | \
+  samtools view -bS -o CCPMBiobankMEGA2_20002558X345183_A1.bam
+
+###########################################################################
+## CONVERT GSA DATA FROM IDAT TO GTC                                     ##
+###########################################################################
+
+bpm=${bpms[$pfx]}
+egt=${egts[$pfx]}
+
+mkdir -p gtcs
+$HOME/bin/iaap-cli/iaap-cli gencall "$bpm" "$egt" gtcs -f . -g
+# mono $HOME/bin/autoconvert/AutoConvert.exe . gtcs "$bpm" "$egt"
+/bin/rm *.idat
+
+bcftools +gtc2vcf --gtcs gtcs -o $pfx.gtc.tsv
+
+###########################################################################
+## CONVERT DATA FROM GTC TO VCF                                          ##
+###########################################################################
+
+# see https://github.com/freeseek/gtc2vcf
+
+bpm=${bpms[$pfx]}
+egt=${egts[$pfx]}
+csv=${csvs[$pfx]}
+sam=${sams[$pfx]}
+
+ln -s $HOME/res/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+ln -s $HOME/res/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
+ln -s "../../illumina/$bpm"
+ln -s "../../illumina/$egt"
+ln -s "../../illumina/$csv"
+if [ -n "$sam" ]; then
+  ln -s "../../illumina/$sam"
+fi
+
+ref="GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
+if [ -n "$sam" ]; then \
+  bcftools +gtc2vcf --no-version -Ou -f $ref -b "$bpm" -c $csv -e "$egt" -s "$sam" -g gtcs -x $pfx.sex; \
+else \
+  bcftools +gtc2vcf --no-version -Ou -f $ref -b "$bpm" -c $csv -e "$egt" -g gtcs -x $pfx.sex; \
+fi | \
+  bcftools sort -Ou -T ./bcftools-sort.XXXXXX | \
+  bcftools reheader -s map.tsv | \
+  bcftools norm --no-version -Ob -o $pfx.GRCh38.bcf -c x -f $ref && \
+  bcftools index -f $pfx.GRCh38.bcf
+
+# bcftools +gtc2vcf --no-version -c $csv -s $sam -o ${csv%.csv}.GRCh38.csv
+
+###########################################################################
+## ANNOTATE VARIANTS                                                     ##
+###########################################################################
+
+date="20200419"
+ln -s $HOME/res/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+ln -s $HOME/res/ensembl/Homo_sapiens.GRCh38.fixed.98.gff3.gz
+ln -s $HOME/res/clinvar/clinvar_$date.GRCh38.vcf.gz
+ln -s $HOME/res/clinvar/clinvar_$date.GRCh38.vcf.gz.tbi
+ln -s $HOME/res/ALL.GRCh38_sites.20170504.bcf
+ln -s $HOME/res/ALL.GRCh38_sites.20170504.bcf.csi
+
+list="KGP_AF:=AF,EAS_AF,EUR_AF,AFR_AF,AMR_AF,SAS_AF"
+bcftools annotate --no-version -Ou -a ALL.GRCh38_sites.20170504.bcf -c $list $pfx.GRCh38.bcf | \
+  bcftools csq --no-version -Ob -o $pfx.csq.GRCh38.bcf -f GCA_000001405.15_GRCh38_no_alt_analysis_set.fna \
+  -g Homo_sapiens.GRCh38.fixed.98.gff3.gz -b -l -n 128 && \
+  bcftools index -f $pfx.csq.GRCh38.bcf && \
+  /bin/rm $pfx.GRCh38.bcf{,.csi}
+
+list="VARIATIONID,EXAC_AF:=AF_EXAC,CLNDN,CLNSIG,GENEINFO,MC,RS"
+bcftools annotate --no-version -Ob -o $pfx.clinvar.GRCh38.bcf -a clinvar_$date.GRCh38.vcf.gz -c $list $pfx.csq.GRCh38.bcf && \
+  bcftools index -f $pfx.clinvar.GRCh38.bcf && \
+  /bin/rm $pfx.csq.GRCh38.bcf{,.csi}
+
+###########################################################################
+## EXTRACT ACMG59 TABLE                                                  ##
+###########################################################################
+
+ln -s ../acmg59.txt
+
+opt=${opts[$pfx]}
+
+hdr="SAMPLE\tGT\tGQ\tCHROM\tPOS_GRCh38\tID\tREF\tALT\tKGP_AF\tEAS_AF\tEUR_AF\tAFR_AF\tAMR_AF\tSAS_AF\tEXAC_AF\tURL\tCLNDN\tCLNSIG\tGENEINFO\tMC\tCSQ"
+fmt="[%SAMPLE\t%GT\t%GQ\t%CHROM\t%POS\t%ID\t%REF\t%ALT\t%KGP_AF\t%EAS_AF\t%EUR_AF\t%AFR_AF\t%AMR_AF\t%SAS_AF\t%EXAC_AF\thttps://www.ncbi.nlm.nih.gov/clinvar/variation/%VARIATIONID\t%CLNDN\t%CLNSIG\t%GENEINFO\t%MC\t%INFO/BCSQ\n]"
+(echo -e "$hdr"; \
+bcftools view --no-version -Ou -c 1 -i 'CLNDN!="." &&
+  (CLNSIG=="Pathogenic" || CLNSIG=="Likely_pathogenic" || CLNSIG=="Pathogenic/Likely_pathogenic") &&
+  ID!="rs59684335" && ID!="seq-rs786202200" && ID!="seq-rs797045904" &&
+  ID!="seq-rs730880361" && ID!="seq-rs727503172" && ID!="seq-rs397515087" &&
+  ID!="seq-rs587779333.1" && ID!="rs80357962" && ID!="rs886040223"' $pfx.clinvar.GRCh38.bcf | \
+  bcftools query $opt -f "$fmt" -i 'GT!="./." & GT!="0/0"' | awk -v pfx="$pfx" 'NR==FNR {x[$1]++}
+  NR>FNR {split($19,a,"|"); for (i in a) {split(a[i],b,":");
+  if (b[1] in x) print $0"\thttps://personal.broadinstitute.org/giulio/goodcell/mocha/"pfx"."$6".png"}}' acmg59.txt -) | \
+  grep -v ^203533890075 > $pfx.acmg59.tsv
+
+mkdir -p pngs
+for snp in chr19:44908684:rs429358 chr7:6009019:seq-rs587779333.1 chr17:43092919:rs80357962 chr17:43082452:rs886040223 \
+  $(tail -n+2 $pfx.acmg59.tsv | cut -f4-6 | tr '\t' ':' | sort | uniq); do
+  chr=$(echo $snp | cut -d: -f1)
+  pos=$(echo $snp | cut -d: -f2)
+  id=$(echo $snp | cut -d: -f3)
+  gtc2vcf_plot.R --illumina --vcf $pfx.clinvar.GRCh38.bcf --chrom $chr --pos $pos --id $id --png pngs/$pfx.$id.png
+done
+
+# GSA2 stuff
+# seq-rs587779333.1 seem monomorphic for the wrong allele
+# rs80357962 and rs886040223 seem to be too polymorphic to be BRCA1 frameshift variants
+
+###########################################################################
+## RUN MOCHA                                                             ##
+###########################################################################
+
+# see https://github.com/freeseek/mocha
+
+ln -s $HOME/res/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+ln -s $HOME/res/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
+ln -s $HOME/res/dup.grch38.bed.gz
+ln -s $HOME/res/genetic_map_hg38_withX.txt.gz
+ln -s $HOME/res/cnp.grch38.bed
+ln -s $HOME/res/cytoBand.hg38.txt.gz
+
+mkdir -p mocha
+bcftools annotate --no-version -Ou -x FILTER,^INFO/ALLELE_A,^INFO/ALLELE_B,^FMT/GT,^FMT/BAF,^FMT/LRR $pfx.clinvar.GRCh38.bcf | \
+  bcftools norm --no-version -d none -Ob -o mocha/$pfx.unphased.GRCh38.bcf && \
+  bcftools index -f mocha/$pfx.unphased.GRCh38.bcf
+
+awk -F"\t" 'NR>1 && $21>.9 {print $1}' $pfx.gtc.tsv | sed 's/\.gtc$//' | sort | join -t$'\t' - <(sort map.tsv) | cut -f2 > $pfx.pass
+n=$(cat $pfx.pass | wc -l);
+ns=$((n*98/100));
+echo '##INFO=<ID=JK,Number=1,Type=Float,Description="Jukes Cantor">' | \
+  bcftools annotate --no-version -Ou -a dup.grch38.bed.gz -c CHROM,FROM,TO,JK -h /dev/stdin -S $pfx.pass mocha/$pfx.unphased.GRCh38.bcf | \
+  bcftools +fill-tags --no-version -Ou -t ^Y,MT,chrY,chrM -- -t NS,ExcHet | \
+  bcftools +mochatools --no-version -Ou -- -x $pfx.sex -G | \
+  bcftools annotate --no-version -Ob -o mocha/$pfx.xcl.GRCh38.bcf \
+  -i 'FILTER!="." && FILTER!="PASS" || JK<.02 || NS<'$ns' || ExcHet<1e-6 || AC_Sex_Test>6' \
+  -x FILTER,^INFO/JK,^INFO/NS,^INFO/ExcHet,^INFO/AC_Sex_Test && \
+  bcftools index -f mocha/$pfx.xcl.GRCh38.bcf
+
+kgp_pfx="$HOME/res/kgp/ALL.chr"
+kgp_sfx="_GRCh38.genotypes.20170504"
+for chr in {1..22} X; do
+  eagle \
+    --geneticMapFile genetic_map_hg38_withX.txt.gz \
+    --outPrefix mocha/$pfx.chr$chr.GRCh38 \
+    --numThreads 2 \
+    --vcfRef $kgp_pfx${chr}$kgp_sfx.bcf \
+    --vcfTarget mocha/$pfx.unphased.GRCh38.bcf \
+    --vcfOutFormat b \
+    --noImpMissing \
+    --outputUnphased \
+    --vcfExclude mocha/$pfx.xcl.GRCh38.bcf \
+    --chrom $chr \
+    --pbwtIters 3 && \
+  bcftools index -f mocha/$pfx.chr$chr.GRCh38.bcf
+done
+bcftools view --no-version -Ob -o mocha/$pfx.other.GRCh38.bcf \
+  -t ^$(seq -s, 1 22),X,$(seq -f chr%.0f -s, 1 22),chrX mocha/$pfx.unphased.GRCh38.bcf && \
+  bcftools index mocha/$pfx.other.GRCh38.bcf
+
+bcftools concat --no-version -Ou mocha/$pfx.{chr{{1..22},X},other}.GRCh38.bcf | \
+  bcftools +mochatools --no-version -Ob -o mocha/$pfx.GRCh38.bcf -- -f GCA_000001405.15_GRCh38_no_alt_analysis_set.fna && \
+  bcftools index mocha/$pfx.GRCh38.bcf
+
+bcftools +mocha \
+  --no-version -Ob \
+  -o mocha/$pfx.mocha.GRCh38.bcf \
+  --threads 1 \
+  --rules GRCh38 \
+  --variants ^mocha/$pfx.xcl.GRCh38.bcf \
+  -m mocha/$pfx.mocha.tsv \
+  -g mocha/$pfx.stats.tsv \
+  -u mocha/$pfx.ucsc.bed \
+  -p cnp.grch38.bed \
+  --LRR-weight 0.2 \
+  --order-LRR-GC 2 \
+  mocha/$pfx.GRCh38.bcf && \
+  bcftools index mocha/$pfx.mocha.GRCh38.bcf
+
+cat mocha/$pfx.mocha.tsv | awk -v pfx="$pfx" 'NR==1 {print $0"\tURL"}
+  NR>1 && $21!~"CNP" && ($6>1e6 || $6>5e5 && $14<2) && ($16>50 || $17>20) {
+  print $0"\thttps://personal.broadinstitute.org/giulio/goodcell/mocha/"pfx"."$1"_"$3"_"$4"_"$5".png"}' > $pfx.large.mocha.tsv
+ln -s mocha/$pfx.stats.tsv
+
+summary_plot.R --stats mocha/$pfx.stats.tsv --calls mocha/$pfx.mocha.tsv --pdf $pfx.summary.pdf
+
+
+
+mocha_plot.R --mocha --cytoband $HOME/res/cytoBand.hg38.txt.gz --png /tmp/test.png --vcf mocha/20200110.mocha.GRCh38.bcf \
+  --samples 8033684140 --regions chr1:145696087-248956422
+mocha_plot.R --mocha --cytoband $HOME/res/cytoBand.hg38.txt.gz --png /tmp/test2.png --vcf mocha/20200110.mocha.GRCh38.bcf \
+  --samples 8033684079 --regions chr15:19847685-101991189
+mocha_plot.R --mocha --cytoband $HOME/res/cytoBand.hg38.txt.gz --png /tmp/test3.png --vcf mocha/20200110.mocha.GRCh38.bcf \
+  --samples 8037702308 --regions chr12:0-56613214
+
+# 8033163000 8033684110 are bad quality
+# 8033673352 is 09C98633 with 11p CNN-LOH
+# 8037737797 is 305-13251 (MH0201393) with trisomy 8 rescue
+# 8037702308 is MH0145622 with ATM deletion on chromosome 11
+# 8035158042 is 352-60251 (MH0197311) with multiple chromosome 2 events
+
+###########################################################################
+## COMPUTE PRINCIPAL COMPONENTS AND ANCESTRY                             ##
+###########################################################################
+
+# see https://github.com/freeseek/kgp2anc
+
+ln -s $HOME/res/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+ln -s $HOME/res/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
+
+vcf2plink.py --build b38 --ref GCA_000001405.15_GRCh38_no_alt_analysis_set.fna --out $pfx --impute-sex .6 .6 --vcf $pfx.clinvar.GRCh38.bcf
+markerqc.sh $pfx out/$pfx $HOME/res/ld.grch38.bed
+kgpmerge.sh $pfx kgp/$pfx $HOME/res/kgp/kgp.array.grch38 out/$pfx.prune.in
+kgp2pc.py --grm-bin kgp/$pfx --fam kgp/$pfx.fam --out kgp/$pfx --pop $HOME/res/kgp/kgp.pop
+pc2anc.R kgp/$pfx.all.pca $HOME/res/kgp/kgp.anc $pfx.anc.tsv
+
+###########################################################################
+## CLEAN UP                                                              ##
+###########################################################################
+
+/bin/rm mocha/$pfx.{unphased,chr{{1..22},X},other}.GRCh38.bcf{,.csi}
+
+###########################################################################
+## MOCHA PLOTS                                                           ##
+###########################################################################
+
+ln -s $HOME/res/cytoBand.hg38.txt.gz
+
+mkdir -p pngs
+n=$(tail -n+2 $pfx.large.mocha.tsv | wc -l)
+sm=( $(cut -f1 $pfx.large.mocha.tsv) )
+chr=( $(cut -f3 $pfx.large.mocha.tsv) )
+beg=( $(cut -f4 $pfx.large.mocha.tsv) )
+end=( $(cut -f5 $pfx.large.mocha.tsv) )
+for i in $(seq 1 $n); do
+  mocha_plot.R \
+    --mocha \
+    --cytoband cytoBand.hg38.txt.gz \
+    --png pngs/$pfx.${sm[$i]}_${chr[$i]}_${beg[$i]}_${end[$i]}.png \
+    --vcf mocha/$pfx.mocha.GRCh38.bcf \
+    --samples ${sm[$i]} \
+    --regions ${chr[$i]}:${beg[$i]}-${end[$i]}
+done
+
+###########################################################################
+## EXTRACT TABLE                                                         ##
+###########################################################################
+
+ln -s mocha/20180117.stats.tsv 2018_07/20180117.stats.tsv
+ln -s mocha/20200110.stats.tsv 2020_01/20200110.stats.tsv
+ln -s mocha/20200302.stats.tsv 2020_03/20200302.stats.tsv
+ln -s mocha/20200319.stats.tsv 2020_04/20200319.stats.tsv
+ln -s mocha/20200320.stats.tsv 2020_05/20200320.stats.tsv
+
+csv2xlsx.py -d tab -w 1.3 -b -f 1 0 -o array.GRCh38.xlsx -i \
+  2018_07/20180117.{anc,acmg59,stats,large.mocha}.tsv \
+  2020_01/20200110.{anc,acmg59,stats,large.mocha}.tsv \
+  2020_03/20200302.{anc,acmg59,stats,large.mocha}.tsv \
+  2020_04/20200319.{anc,acmg59,stats,large.mocha}.tsv \
+  2020_05/20200320.{anc,acmg59,stats,large.mocha}.tsv -t \
+  "20180117 ancestry" "20180117 ACMG59" "20180117 Stats" "20180117 MoChA" \
+  "20200110 ancestry" "20200110 ACMG59" "20200110 Stats" "20200110 MoChA" \
+  "20200302 ancestry" "20200302 ACMG59" "20200302 Stats" "20200302 MoChA" \
+  "20200319 ancestry" "20200319 ACMG59" "20200319 Stats" "20200319 MoChA" \
+  "20200320 ancestry" "20200320 ACMG59" "20200320 Stats" "20200320 MoChA"
+scp array.GRCh38.xlsx 2018_07/pngs/20180117.*.png 2020_01/pngs/20200110.*.png \
+  2020_03/pngs/20200302.*.png 2020_04/pngs/20200319.*.png 2020_05/pngs/20200320.*.png \
+  2018_07/*.pdf 2020_01/*.pdf 2020_03/*.pdf 2020_04/*.pdf 2020_05/*.pdf \
+  giulio@xfer3.broadinstitute.org:public_html/goodcell/array/
+
+find -iname "*.log" -exec /bin/rm '{}' \;
+find -type l -exec /bin/rm '{}' \;
+
+###########################################################################
+## ACE2 / IL6 / IL6R / CXCL8                                             ##
+###########################################################################
+
+declare -A regs=( ["ACE2"]="chrX:15561033-15602069" ["IL6"]="chr7:22725884-22732002"
+                  ["IL6R"]="chr1:154405343-154469450" ["CXCL8"]="chr4:73740569-73743716" )
+
+declare -A vcfs=( ["GSA"]="2020_04/20200319.clinvar.GRCh38.bcf" ["MEGA"]="2020_05/20200320.clinvar.GRCh38.bcf" )
+
+fmt="%CHROM\t%POS\t%ID\t%REF\t%ALT\t%KGP_AF\t%EAS_AF\t%EUR_AF\t%AFR_AF\t%AMR_AF\t%SAS_AF\t%BCSQ\n"
+
+for gene in ACE2 IL6 IL6R CXCL8; do
+  for array in GSA MEGA; do
+    bcftools query -Hf "$fmt" ${vcfs[$array]} -r ${regs[$gene]} | \
+      sed 's/^# //;s/\[[0-9][0-9]*\]//g;s/POS/POS_GRCh38/' | cut -d, -f1 > /tmp/$gene.$array.tsv
+  done
+done
+
+csv2xlsx.py -d tab -w 1.3 -b -f 1 0 -o covid19.GRCh38.xlsx -i \
+  /tmp/{ACE2,IL6,IL6R,CXCL8}.{GSA,MEGA}.tsv -t \
+  {ACE2,IL6,IL6R,CXCL8}.{GSAv2,MEGAv2}
+
+scp covid19.GRCh38.xlsx giulio@xfer3.broadinstitute.org:public_html/goodcell/
