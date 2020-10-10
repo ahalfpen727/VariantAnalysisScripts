@@ -19,5 +19,20 @@ for pfx in 20180117 20200110; do
     egt=${egts[$pfx]}
     mkdir -p $wrkdr/$dir/GTCs
     $HOME/toolbin/iaap-cli/iaap-cli gencall $bpm $egt $wrkdr/$dir/GTCs -f $wrkdr/$dir/Raw_Data/ -g
-    bcftools +gtc2vcf --gtcs  $wrkdr/$dir/GTCs -o $wrkdr/$dir/$dir.gtc.tsv
+    bcftools +gtc2vcf --gtcs  $wrkdr/$dir/GTCs -o $wrkdr/$dir/$pfx.gtc.tsv
+done
+
+for pfx in 20180117 20200110; do
+    dir=${dirs[$pfx]}
+    touch $wrkdr/$dir/dir.txt
+    find -iname "*_idat" | xargs $wrkdr/$dir/dir.txt
+    for f in $wrkdr/$dir/dir.txt; do
+    dir=$f
+    cd $dir
+    touch $wrkdr/$dir/files.txt
+    find -iname "*.idat" | xargs > $wrkdr/$dir/files.txt
+    for f in $wrkdr/$dir/files.txt; do
+	bcftools +gtc2vcf -i -g $f
+    done
+    done
 done

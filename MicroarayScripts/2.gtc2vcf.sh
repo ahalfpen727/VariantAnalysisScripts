@@ -1,21 +1,24 @@
 #!bin/bash
+# CONVERT DATA FROM GTC TO VCF
 
 ###########################################################################
-# CONVERT DATA FROM GTC TO VCF                                          
-# set index dir location env variables etc
+# set env variables for index locations
 ###########################################################################
-
-export WORK_DIR=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/GSA_Data
-export INDEX_DIR=/media/drew/easystore/ReferenceGenomes/GCA_000001405.15_GRCh38_no_alt_analysis_set
-export ref=$INDEX_DIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+export GSA_DIR=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/GSA_Data
+export MEGA_DIR=/media/drew/easystore/ReferenceGenomes/MEGA_8v2_0
 export REF_DIR=/media/drew/easystore/ReferenceGenomes
+export INDEX_DIR=$REF_DIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
+export ref=$INDEX_DIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 
 for file in $INDEX_DIR; do
     ln -s $file
 done
 
+bcftools +gtc2vcf -c $MEGA_DIR/CCPMBiobankMEGA2_20002558X345183_A1.csv --fasta-flank | \
+  bwa mem -M $ref - | samtools view -bS -o $MEGA_DIR/CCPMBiobankMEGA2_20002558X345183_A1.bam
+
+
 declare -A wdir=( ["20180117"]="2018_07" ["20200110"]="2020_01" )
-declare -A rfdir=( ["20180117"]="GSA_24v1_0" ["20200110"]="GSA_24v2_0" )
 declare -A bpm=( ["20180117"]="/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/GSA_Data/2018_07/GenomeStudio_Files/Manifest_Files/GSA-24v1-0_A2.bpm" ["20200110"]="/media/drew/easystore/ReferenceGenomes/GSA_24v2_0/GSA-24v2-0_A2.bpm" )
 declare -A egt=( ["20180117"]="/media/drew/easystore/ReferenceGenomes/GSA_24v1_0/GSA-24v1-0_A1_ClusterFile.egt" ["20200110"]="/media/drew/easystore/ReferenceGenomes/GSA_24v2_0/GSA-24v2-0_A1_ClusterFile.egt" )
 declare -A csv=( ["20180117"]="/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/GSA_Data/2018_07/GenomeStudio_Files/Manifest_Files/GSA-24v1-0_A2.csv"  ["20200110"]="/media/drew/easystore/ReferenceGenomes/GSA_24v2_0/GSA-24v2-0_A2.csv" )
@@ -27,9 +30,8 @@ declare -A opts=( ["20180117"]="" ["20200110"]="-s ^8033684100" ["20200320"]="CC
 ###########################################################################
 
 for pfx in 20180117 20200110; do
-    workdir=$WORK_DIR/${wdir[$pfx]}
+    workdir=$GSA_DIR/${wdir[$pfx]}
     wdr=${wdir[$pfx]}
-    refdir=${rfdir[$pfx]}
     bpm=${bpm[$pfx]}
     egt=${egt[$pfx]}
     csv=${csv[$pfx]}

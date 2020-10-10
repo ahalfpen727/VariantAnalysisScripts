@@ -1,8 +1,8 @@
-# This repository contains several NGS data analysis workflows
+# This repository contains several several (in-progess) data analysis workflows for Variant analyses
+!(GATK Variant Calling Best Practices Pipeline for DNA-seq](./Reference-Files/variant-calling-pipeline.jpeg )
 
-The workflows are bifurcated across two main directories.The DNA microarray analysis workflow is designed to analyze Illumina Infinimum GSA microarray data from several input directories. The targeted sequencing workflow is designed for the analysis of MiSeq and NextSeq Data.
-
-## DNA microarray Analysis Steps:
+## Illumina Infinium GSA microarray Analysis:
+### This is a DNA-Seq variant microarray analysis designed for operation with data produced from the Illumina Infinimum GSA microarray beadchip.
 1) Convert IDAT to GTC
 2) Convert GTC to VCF
 3) Annotate variants
@@ -15,6 +15,7 @@ The workflows are bifurcated across two main directories.The DNA microarray anal
 10) Generate MoChA call plots
 
 ## Targeted sequencing Analysis Steps:
+### This is a targeted sequencing workflow. It is designed for the analysis of either Illumina MiSeq or Illumina NextSeq targeted sequencing datA.
 1) Align data (BWA)
 2) Remove duplicates
 3) Recalibrate base pairs
