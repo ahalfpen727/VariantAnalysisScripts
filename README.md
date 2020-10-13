@@ -1,5 +1,5 @@
 # This repository contains several several (in-progess) data analysis workflows for Variant analyses
-!(GATK Variant Calling Best Practices Pipeline for DNA-seq](./Reference-Files/variant-calling-pipeline.jpeg )
+!(GATK Variant Calling Best Practices Pipeline for DNA-seq](https://github.com/ahalfpen727/VariantAnalysisScripts/blob/master/Reference-Files/DNA-Seq-variant-calling-pipeline.png)
 
 ## Illumina Infinium GSA microarray Analysis:
 ### This is a DNA-Seq variant microarray analysis designed for operation with data produced from the Illumina Infinimum GSA microarray beadchip.
