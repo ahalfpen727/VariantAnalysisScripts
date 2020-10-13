@@ -21,18 +21,21 @@ done
 #done
 
 declare -A miseqdir=( ["2019_09"]="2019_09" ["2019_12"]="2019_12" )
-declare -A datadir=( ["2019_09"]="LVB_fastq_Sept2019/concat_fastq" ["2019_12"]="/LVB_fastq_Dec2019/concat_fastq" )
+declare -A datadir=( ["2019_09"]="LVB_fastq_Sept2019/concat_fastq" ["2019_12"]="LVB_fastq_Dec2019/concat_fastq" )
 for pfx in 2019_09 2019_12; do
     miseqdir=${miseqdir[$pfx]}
     datadir=${datadir[$pfx]}
-    mkdir -p $WORK_DIR/$miseqdir/MiSeq_Results_out
-    export RESULTS=$WORK_DIR/$miseqdir/MiSeq_Results_out
-    touch $WORK_DIR/$miseqdir/sm.txt
-    touch $WORK_DIR/$miseqdir/sm.file.txt
-    export INPUT_FILE=$WORK_DIR/$miseqdir/sm.file.txt
-    export INPUTFILE=$WORK_DIR/$miseqdir/sm.txt
-    export INPUT_DIR=$WORK_DIR/$miseqdir/$datadir
-    find $INPUT_DIR -iname "*_R1_0[01][12].fastq.gz" | cut -d/ -f2 | cut -d_ -f1 > $INPUTFILE
+    cd $WORK_DIR/$miseqdir/$datadir
+    mkdir -p ../..//MiSeq_Results_out
+    touch ../../sm.txt
+#    touch ../../sm.file.txt
+    export RESULTS=../../MiSeq_Results_out
+    export INPUTFILE=../../sm.txt
+#    export INPUT_FILE=../../sm.txt
+    find -iname "*_R1_0[012][01][12].fastq.gz" > $INPUTFILE
+#    for i in $(cat $INPUTFILE); do
+#	basename -s "R1_0[01][12].fastq.gz" $i >> $INPUT_FILE
+#    done
     #######################
     # MISEQ FASTQ ALIGNMENT                                                   
     #######################
