@@ -1,4 +1,5 @@
-# This repository contains several several (in-progess) data analysis workflows for Variant analyses
+# Variant Analysis Workflows
+## This repository contains several several (in-progess) data analysis workflows for the analysis of variants from different sources of sequencing data
 ![GATK Variant Calling Best Practices Pipeline for DNA-seq](https://github.com/ahalfpen727/VariantAnalysisScripts/blob/master/Reference-Files/DNA-Seq-variant-calling-pipeline.png)
 
 ## Illumina Infinium GSA microarray Analysis:
