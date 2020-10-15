@@ -19,8 +19,7 @@ declare -A datadir=( ["2019_09"]="LVB_fastq_Sept2019" ["2019_12"]="LVB_fastq_Dec
 # MISEQ FASTQ ALIGNMENT                                                   
 ###########################################################################
 
-#for pfx in 2019_09 2019_12; do
-for pfx in 2019_12; do
+for pfx in 2019_09 2019_12; do
     miseqdir=${miseqdir[$pfx]}
     datadir=${datadir[$pfx]}
     cd $miseqdir

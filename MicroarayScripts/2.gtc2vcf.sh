@@ -14,8 +14,8 @@ for file in $INDEX_DIR; do
     ln -s $file
 done
 
-bcftools +gtc2vcf -c $MEGA_DIR/CCPMBiobankMEGA2_20002558X345183_A1.csv --fasta-flank | \
-  bwa mem -M $ref - | samtools view -bS -o $MEGA_DIR/CCPMBiobankMEGA2_20002558X345183_A1.bam
+#bcftools +gtc2vcf -c $MEGA_DIR/CCPMBiobankMEGA2_20002558X345183_A1.csv --fasta-flank | \
+#  bwa mem -M $ref - | samtools view -bS -o $MEGA_DIR/CCPMBiobankMEGA2_20002558X345183_A1.bam
 
 
 declare -A wdir=( ["20180117"]="2018_07" ["20200110"]="2020_01" )
@@ -36,14 +36,16 @@ for pfx in 20180117 20200110; do
     egt=${egt[$pfx]}
     csv=${csv[$pfx]}
     sam=${sam[$pfx]}
-    touch $workdir/$wdr.index.GRCh38.bcf
-    ln -s $workdir/$wdr.index.GRCh38.bcf
-    export TMP_DIR=$workdir/bcftools-sort.XXXXXX
-    bcftools +gtc2vcf --gtcs $workdir/GTCs -o $workdir/$wdr.maps.tsv
-    bcftools +gtc2vcf -Ou -f $ref -b $bpm  -e $egt -x $workdir/$wdr.sex -g $workdir/GTCs -o $workdir/$wdr.GRCh38.bcf | \
-    bcftools sort -Ou -T $TMP_DIR | \
-    bcftools reheader -s $workdir/$wdr.map.tsv | \
-    bcftools norm --no-version -Ou -o  $workdir/$wdr.GRCh38.bcf -c x -f $ref && \
-    bcftools index -f  $workdir/$wdr.index.GRCh38.bcf
-    bcftools +gtc2vcf --no-version -c $csv -s $sam -o ${csv%.csv}.GRCh38.csv
+    touch $wdr.GRCh38.bcf
+    touch $wdr.index.GRCh38.bcf
+    if [ -n "$sam" ]; then \
+	bcftools +gtc2vcf -Ou -f $ref -b $bpm -e $egt -c $csv -s $sam --gtcs $workdir/GTCs -x $workdir/$wdr.sex;
+    else \
+	bcftools +gtc2vcf -Ou -f $ref -b $bpm -e $egt -c $csv --gtcs $workdir/GTCs -x $workdir/$wdr.sex; \
+    fi | \
+	bcftools sort -Oz -T ./bcftools-sort.XXXXXX | \
+	bcftools reheader -s $workdir/$wdr.map.tsv | \
+	bcftools norm --no-version -Ou -o  $workdir/$wdr.GRCh38.bcf -c x -f $ref && \
+	bcftools index -f  $workdir/$wdr.GRCh38.bcf
+#        bcftools +gtc2vcf --no-version -c $csv -s $sam -o ${csv%.csv}.GRCh38.csv
 done

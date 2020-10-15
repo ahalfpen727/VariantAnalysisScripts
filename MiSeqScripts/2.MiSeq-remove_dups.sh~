@@ -1,0 +1,35 @@
+#!bin/bash
+
+###########################################################################
+# MISEQ DATA                                                            
+###########################################################################
+
+export REFDIR=/media/drew/easystore/ReferenceGenomes/
+export IDX_DIR=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
+export REF=$IDX_DIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+export WORK_DIR=/media/drew/easystore/GoodCell-Resources/GuniosAnalysis/MiSeq_Data
+ln -s $HOME/toolbin/picard.jar
+declare -A miseqdir=( ["2019_09"]="2019_09" ["2019_12"]="2019_12" )
+declare -A datadir=( ["2019_09"]="LVB_fastq_Sept2019" ["2019_12"]="LVB_fastq_Dec2019" )
+for file in $IDX_DIR; do
+    ln -s $file
+done
+
+###########################################################################
+## REMOVE DUPLICATES                                                     ##
+###########################################################################
+
+for pfx in 2019_09 2019_12; do
+    miseqdir=${miseqdir[$pfx]}
+    datadir=${datadir[$pfx]}
+    cd $miseqdir
+    sm_arr=( $(cat sm.txt) )
+    n=${#sm_arr[@]}
+    for i in $(seq 1 $n); do
+	sm_arr=( $(cat sm.txt) ); \
+	sm=${sm_arr[(($i-1))]}; \
+	java -jar $HOME/toolbin/picard.jar MarkDuplicates I=$datadir/$sm.raw.bam  \
+	    O=$datadir/$sm.tmp.bam M=$datadir/$sm.dups_metrics.txt && \
+	    samtools index $datadir/$sm.tmp.bam
+    done
+done
