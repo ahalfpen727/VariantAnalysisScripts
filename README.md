@@ -22,7 +22,7 @@ The pipelines are ordered in a logical sequence for initial discovery of variant
 10) Generate MoChA call plots (MoChA)
 
 ## Targeted Sequencing Pipeline:
-### This is a targeted sequencing variant anlysis workflow. This analysis required I llumina MiSeq or Illumina NextSeq targeted sequencing data as input.
+### This is a targeted sequencing variant anlysis workflow. This analysis requires I llumina MiSeq or Illumina NextSeq targeted sequencing data as input.
 
 ![GATK's Germline Variant Discovery for Analysis of Individuals Samples](/Pipeline-Overview-and-Related-Resources/Pipeline-Images/Germline_Single_Sample_Variant_Discovery.png)
 
