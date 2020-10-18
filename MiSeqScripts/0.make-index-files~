@@ -1,0 +1,37 @@
+#!bin/bash
+
+###########################################################################
+# Load Indexes and create input file
+###########################################################################
+
+export REFDIR=/media/drew/easystore/ReferenceGenomes/
+export IDXDIR=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set/
+export IDXBASE=$IDXDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
+export REFFA=$IDXDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+export GATK=$HOME/toolbin/gatk-4.1.8.1/gatk-package-4.1.8.1-local.jar
+
+declare -A miseqdir=( ["2019_09"]="2019_09" ["2019_12"]="2019_12" )
+declare -A datadir=( ["2019_09"]="LVB_fastq_Sept2019" ["2019_12"]="LVB_fastq_Dec2019" )
+
+###########################################################################
+# Create fasta dict and fasta index file
+###########################################################################
+java -jar $GATK CreateSequenceDictionary -R $REFFA > $IDXDIR
+samtools faidx $REFFA > $IDXDIR
+
+###########################################################################
+# Create samples file that will serve as input for the pipeline
+###########################################################################
+
+for pfx in 2019_09 2019_12; do
+    miseqdir=${miseqdir[$pfx]}
+    cd $miseqdir
+    touch ./sm.file.txt
+    touch ./sm.txt
+    export INPUTFILE=./sm.file.txt
+    export INPUT_FILE=./sm.txt
+    find -iname "*_R1_*.fastq.gz" > $INPUTFILE
+    for i in $(cat $INPUTFILE); do
+	basename -s "R1_001.fastq.gz" $i >> $INPUT_FILE
+    done
+done

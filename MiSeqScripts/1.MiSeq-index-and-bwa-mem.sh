@@ -31,7 +31,6 @@ for pfx in 2019_09 2019_12; do
     export INPUTFILE=./sm.txt
     export RESULTS=MiSeq_Results_out
     find -iname "*_R1_*.fastq.gz" > $INPUT_FILE
-#    cut -d/ -f2 $INPUT_FILE | cut -d_ -f1 > $INPUTFILE
     for i in $(cat $INPUT_FILE); do
 	basename -s "R1_001.fastq.gz" $i >> $INPUTFILE
     done
