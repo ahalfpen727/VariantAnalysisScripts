@@ -24,7 +24,7 @@ The pipelines are ordered in a logical sequence for initial discovery of variant
 ## Targeted Sequencing Pipeline:
 ### This is a targeted sequencing variant anlysis workflow. This analysis required I llumina MiSeq or Illumina NextSeq targeted sequencing data as input.
 
-![GATK's Germline Variant Discovery for Analysis of Individuals Samples](/Pipeline-Overview-and-Related-Resources/Pipeline-Images/Germline_Single_Sample__Variant_Discovery.png)
+![GATK's Germline Variant Discovery for Analysis of Individuals Samples](/Pipeline-Overview-and-Related-Resources/Pipeline-Images/Germline_Single_Sample_Variant_Discovery.png)
 
 1) Align data (BWA MEM)
 2) Remove duplicates (picard)
