@@ -2,16 +2,16 @@
 ###########################################################################
 # NEXTSEQ DATA                                                            
 ###########################################################################
-export REF_DIR=$HOME/Downloads/GoodCell-Resources/GuniosAnalysis/ReferenceGenomes/
-export IDX_DIR=$HOME/Downloads/GoodCell-Resources/GuniosAnalysis/ReferenceGenomes/GCA_000001405.15_GRCh38_no_alt_analysis_set
-export VCF_DIR=$HOME/Downloads/GoodCell-Resources/GuniosAnalysis/ReferenceGenomes/VCFs
-export REF_FILE=$HOME/Downloads/GoodCell-Resources/GuniosAnalysis/ReferenceGenomes/GCA_000001405.15_GRCh38_no_alt_analysis_set/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+export REFDIR=$HOME/Downloads/ReferenceGenomes/
+export IDXDIR=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
+export VCFDIR=$REFDIR/GRCh38
+export REFFA=$IDXDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 
-for file in $IDX_DIR; do
+for file in $IDXDIR; do
     ln -s $file
 done
 
-cd ~/Downloads/GoodCell-Resources/GuniosAnalysis/2019_09/LVB_fastq_Sept2019_concat_fastq
+cd /2019_09/LVB_fastq_Sept2019_concat_fastq
 find -iname "*_R1_0012.fastq.gz" | cut -d/ -f2 | cut -d_ -f1 >> ../sm.txt
 
 mkdir -P ../MiSeqResults/raw-sams

@@ -6,24 +6,15 @@
 
 export GSADIR=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/GSA_Data
 export REFDIR=/media/drew/easystore/ReferenceGenomes
-export CLINGCF=$REFDIR/GRCh38/clinvar.GRCh38.vcf.gz
-export ALLGCF=$REFDIR/GRCh38/All_human_9606_b144_GRCh38p2.2015.vcf.gz
 export REFIDX=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
-export REFGFF=$REFDIR/ensembl/Homo_sapiens.GRCh38.fixed.98.gff3.gz
 export REFFA=$REFIDX/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
-
-cd $REFDIR/GRCh38
-touch sm.file.txt
-touch sm.txt
-export INPUTFILE=./sm.file.txt
-export INPUT_FILE=./sm.txt
-
-find -iname "*.vcf.gz" > $INPUTFILE
-for i in $(cat $INPUTFILE); do
-    tabix -p $i
-done
-
-cd $GSADIR
+export REFGFF=$REFDIR/Ensembl/Homo_sapiens.GRCh38.fixed.101.gff3.gz
+export CLINVCF=$REFDIR/GRCh38/clinvar_20200810.vcf.gz
+export CLINTBI=$REFDIR/GRCh38/clinvar_20200810.vcf.gz.tbi
+export G1000VCF=$REFDIR/GRCh38/1000G_phase1.snps.high_confidence.hg38.vcf.gz
+export G1000TBI=$REFDIR/GRCh38/1000G_phase1.snps.high_confidence.hg38.vcf.gz.tbi
+export ALLBCF=$REFDIR/GRCh38/ALL.chrs_GRCh38.genotypes.20170504.bcf.gz
+export ALLCSI=$REFDIR/GRCh38/ALL.chrs_GRCh38.genotypes.20170504.bcf.csi
 
 declare -A gsa=(  ["20180117"]="GSA-24v1_0"  ["20200110"]="GSA_24v2_0" )
 declare -A wdir=( ["20180117"]="2018_07" ["20200110"]="2020_01" )
@@ -39,6 +30,9 @@ declare -A sam=( ["20180117"]="" ["20200110"]="" ["20200302"]="" ["20200319"]=""
 ## Annotate variants using reference VCFs
 ###########################################################################
 
+export list1="KGP_AF:=AF,EAS_AF,EUR_AF,AFR_AF,AMR_AF,SAS_AF"
+export list2="VARIATIONID,EXAC_AF:=AF_EXAC,CLNDN,CLNSIG,GENEINFO,MC,RS"
+
 for pfx in 20180117 20200110; do
     wdir=${wdir[$pfx]}
     gsa=${gsa[$pfx]}
@@ -48,12 +42,10 @@ for pfx in 20180117 20200110; do
     sam=${sam[$pfx]}
     export GSA_DIR=$GSADIR/$wdir
     cd $GSA_DIR
-    list="KGP_AF:=AF,EAS_AF,EUR_AF,AFR_AF,AMR_AF,SAS_AF"
-    bcftools annotate --no-version -Ou -a $ALLGCF -c $list $wdir.$gsa.GRCh38.bcf | \
-    bcftools csq --no-version -Ob -o $wdir.GRCh38.bcf -f $REFFA -g $REFGFF \
-		 -b -l -n 128 && bcftools index -f $wdir.$gsa.GRCh38.bcf
-    list="VARIATIONID,EXAC_AF:=AF_EXAC,CLNDN,CLNSIG,GENEINFO,MC,RS"
-    bcftools annotate --no-version -Ob -o $wdir.clinvar.GRCh38.bcf  \
-	     -a $CLINGCF -c $list $wdir.$gsa.GRCh38.bcf && \
-	bcftools index -f $wdir.clinvar.GRCh38.bcf
+    bcftools annotate --no-version -Ou -a $ALLBCF -c $list1 $wdir.$gsa.GRCh38.bcf | \
+    bcftools csq --no-version -Ob -o $wdir.$gsa.csq.GRCh38.bcf -f $REFFA -g $REFGFF \
+		 -b -l -n 128 && bcftools index -f $wdir.$gsa.csq.GRCh38.bcf
+    bcftools annotate --no-version -Ob -o $wdir.$gsa.clinvar.GRCh38.bcf  \
+	     -a $CLINVCF -c $list2 $wdir.$gsa.csq.GRCh38.bcf && \
+	bcftools index -f $wdir.$gsa.clinvar.GRCh38.bcf
 done

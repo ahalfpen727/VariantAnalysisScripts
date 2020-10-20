@@ -30,9 +30,10 @@ for pfx in 2019_09 2019_12; do
     for i in $(seq 1 $n); do
 	sm_arr=( $(cat $INPUT_FILE) );
 	sm=${sm_arr[(($i-1))]};
-	$GATK BaseRecalibrator -R $REFFA -I $datadir/$sm.tmp.bam --known-sites $VCF1000G -O $datadir/$sm.grp
+	$GATK BaseRecalibrator -R $REFFA -I $datadir/$sm.tmp.bam --known-sites $VCF1000G \
+	      -O $datadir/$sm.grp && \
 	$GATK ApplyBQSR -R $REFFA -I $datadir/$sm.tmp.bam \
-	      --bqsr-recal-file $datadir/$sm.grp -O $datadir/$sm.v2.bam && \
+	      --bqsr-recal-file $datadir/$sm.grp -O $datadir/$sm.bam && \
 	    samtools index $datadir/$sm.bam
     done
 done
