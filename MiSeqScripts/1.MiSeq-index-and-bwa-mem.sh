@@ -24,12 +24,12 @@ for pfx in 2019_09 2019_12; do
     datadir=${datadir[$pfx]}
     cd $miseqdir
     export WORK_DIR=./$datadir
-    mkdir -p ./MiSeq_Results_out
+    mkdir -p ./MiSeq_Results_out/1.RAW_BAMS
     touch ./sm.file.txt
     touch ./sm.txt
     export INPUT_FILE=./sm.file.txt
     export INPUTFILE=./sm.txt
-    export RESULTS=MiSeq_Results_out
+    export RESULTS=/MiSeq_Results_out/1.RAW_BAMS
     find -iname "*_R1_*.fastq.gz" > $INPUT_FILE
     for i in $(cat $INPUT_FILE); do
 	basename -s "R1_001.fastq.gz" $i >> $INPUTFILE

@@ -26,13 +26,16 @@ for pfx in 2019_09 2019_12; do
     export WORKDIR=$WORK_DIR/$miseqdir
     export INPUT_FILE=$WORKDIR/sm.txt
     cd $WORKDIR
+    mkdir -p $datadir/2.TMP_DUP_BAMS
+    export INPUT=$datadir/1.RAW_BAMS
+    export OUTPUT=$datadir/2.TMP_DUP_BAMS
     sm_arr=( $(cat $INPUT_FILE) )
     n=${#sm_arr[@]}
     for i in $(seq 1 $n); do
 	sm_arr=( $(cat $INPUT_FILE) ); \
 	sm=${sm_arr[(($i-1))]}; \
-	java -jar $HOME/toolbin/picard.jar MarkDuplicates I=$datadir/$sm.raw.bam  \
-	    O=$datadir/$sm.tmp.bam M=$datadir/$sm.dups_metrics.txt && \
-	    samtools index $datadir/$sm.tmp.bam
+	java -jar $HOME/toolbin/picard.jar MarkDuplicates I=$INPUT/$sm.raw.bam  \
+	    O=$OUTPUT/$sm.tmp.bam M=$OUTPUT/$sm.dups_metrics.txt && \
+	    samtools index $OUTPUT/$sm.tmp.bam
     done
 done

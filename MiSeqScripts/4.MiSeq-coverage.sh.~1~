@@ -32,12 +32,9 @@ for pfx in 2019_09 2019_12; do
     export OUTPUT=$coverage
     sm_arr=( $(cat $INPUT_FILE) )
     n=${#sm_arr[@]}
-    echo $n
     for i in $(seq 1 $n); do
 	sm_arr=( $(cat $INPUT_FILE) );
 	sm=${sm_arr[(($i-1))]};
-	echo $sm
-	pwd
 	bedtools coverage -g $REFFAI -sorted -a $BEDFILE -b $INPUTDIR/$sm.bam -mean | \
 	    cut -f5 >  $OUTPUT/$sm.cov
     done
