@@ -30,9 +30,6 @@ declare -A sam=( ["20180117"]="" ["20200110"]="" ["20200302"]="" ["20200319"]=""
 ## Annotate variants using reference VCFs
 ###########################################################################
 
-export list1="KGP_AF:=AF,EAS_AF,EUR_AF,AFR_AF,AMR_AF,SAS_AF"
-export list2="VARIATIONID,EXAC_AF:=AF_EXAC,CLNDN,CLNSIG,GENEINFO,MC,RS"
-
 for pfx in 20180117 20200110; do
     wdir=${wdir[$pfx]}
     gsa=${gsa[$pfx]}
@@ -42,10 +39,14 @@ for pfx in 20180117 20200110; do
     sam=${sam[$pfx]}
     export GSA_DIR=$GSADIR/$wdir
     cd $GSA_DIR
+    export list1="KGP_AF:=AF,EAS_AF,EUR_AF,AFR_AF,AMR_AF,SAS_AF"
+    echo $list1
     bcftools annotate --no-version -Ou -a $ALLBCF -c $list1 $wdir.$gsa.GRCh38.bcf | \
     bcftools csq --no-version -Ob -o $wdir.$gsa.csq.GRCh38.bcf -f $REFFA -g $REFGFF \
 		 -b -l -n 128 && bcftools index -f $wdir.$gsa.csq.GRCh38.bcf
-    bcftools annotate --no-version -Ob -o $wdir.$gsa.clinvar.GRCh38.bcf  \
-	     -a $CLINVCF -c $list2 $wdir.$gsa.csq.GRCh38.bcf && \
-	bcftools index -f $wdir.$gsa.clinvar.GRCh38.bcf
+    # export list2="VARIATIONID,EXAC_AF:=AF_EXAC,CLNDN,CLNSIG,GENEINFO,MC,RS"
+    export list2="EXAC_AF:=AF_EXAC,CLNDN,CLNSIG,GENEINFO,MC,RS"
+    echo $list2
+    bcftools annotate --no-version -Ob -a $CLINVCF -c $list2 $wdir.$gsa.csq.GRCh38.bcf \
+	-o $pfx.clinvar.GRCh38.bcf && bcftools index -f $pfx.clinvar.GRCh38.bcf
 done
