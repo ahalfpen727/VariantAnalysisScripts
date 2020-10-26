@@ -1,9 +1,0 @@
-#!bin/bash
-export REFDIR=/media/drew/easystore/ReferenceGenomes/GRCh38
-cd $REFDIR
-touch vcf-files.txt
-find -iname "*.vcf.gz" | xargs vcf-files.txt
-for f in vcf-files.txt; do
-    tabix -p vcf $f
-done
-

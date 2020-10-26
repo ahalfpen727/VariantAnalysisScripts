@@ -1,8 +1,12 @@
-# Variant Analysis Workflows
-## This repository contains several data analysis workflows for variant discovery. The workflows are designed to identify variants from sequence data produced by  several different NGS techonologies. The pipelines follow the general workflow described by the reference material associated with the Genome Analysis Tool-Kit (GATK) documentation and incorporate their best practices as well.
+# Variant Calling Workflows
+This repository contains several variant calling workflows. The workflows are designed to identify variants from sequence data produced by several different types of NGS techonologies.
+![vc](misc/Pipeline-Images/variant_calling_workflow.png)
+
+These pipelines follow the rigorous standards described in the Genome
+Analysis Toolkit's (GATK) ![best practices workflows](https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/best-practices-workflows).
 
 ### GATK's Best Practices Workflow for DNA-Seq Variant Calling
-![GBP](/misc/Pipeline-Images/DNA-Seq-variant-calling-pipeline.png)
+![GBP](/misc/Pipeline-Images/variant-calling-pipeline.jpeg)
 
 The pipelines are ordered in a logical sequence for initial discovery of variants in a large cost effective SNP-array followed by validation of the variants via targeted sequencing. In order to perform cost effective targetded sequencing, thorough variant discovery practices are employed to reduce the number of false positive. The pipelines also differ in how the samples are considered which is desribed further in the individual sections for each workflow.
 
