@@ -30,11 +30,12 @@ for pfx in 2019_09 2019_12; do
     export INPUTDIR=$v2s
     export OUTPUT=$mutect2
     sm_arr=( $(cat $INPUT_FILE) )
-    cd $OUTPUT
     for pfx in hc m2; do
-	input=$(echo ${sm_arr[@]} | sed 's/ /.GRCh38.vcf.gz vcfs\/'$pfx'./g;s/^/vcfs\/'$pfx'./;s/$/.GRCh38.vcf.gz/')
-	bcftools merge --no-version -Ou $input | \
-	    bcftools norm --no-version -Ou -m -any --keep-sum AD | \
+	input=$(echo ${sm_arr[@]} | sed 's/ /.GRCh38.vcf.gz\/'$pfx'./g;s/^//'$pfx'./;s/$/.GRCh38.vcf.gz/')
+	echo $OUTPUT/$input
+#	input=$(echo ${sm_arr[@]} | sed 's/ /.GRCh38.vcf.gz vcfs\/'$pfx'./g;s/^/vcfs\/'$pfx'./;s/$/.GRCh38.vcf.gz/')
+	bcftools merge --no-version -Ou $OUTPUT/$input | \
+	    bcftools norm --no-version -Ou -m- any | \
 	    bcftools norm --no-version -Ob -o $pfx.GRCh38.bcf -f $REFFA && \
 	    bcftools index -f $pfx.GRCh38.bcf
     done

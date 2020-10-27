@@ -1,11 +1,7 @@
 #!/usr/bin/env Rscript
-###
 #  The MIT License
-#
 #  Copyright (C) 2019-2020 Giulio Genovese
-#
 #  Author: Giulio Genovese <giulio.genovese@gmail.com>
-#
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
 #  in the Software without restriction, including without limitation the rights
@@ -23,7 +19,6 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
-###
 
 gtc2vcf_plot_version <- '2020-09-01'
 
@@ -104,14 +99,14 @@ v <- sapply(df[,info], unique)
 if (args$illumina) {
   p1 <- ggplot(df, aes(x = Y, y = X, color = GT, shape = GT)) +
     geom_point(size = .5) +
-    scale_x_continuous(limits = c(0, NA), expand = expand_scale(mult = c(0, .05))) +
-    scale_y_continuous(limits = c(0, NA), expand = expand_scale(mult = c(0, .05))) +
+    scale_x_continuous(limits = c(0, NA), expand = expansion(mult = c(0, .05))) +
+    scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, .05))) +
     theme_bw(base_size = args$fontsize) +
     theme(legend.position = 'none')
   p2 <- ggplot(df, aes(x = NORMY, y = NORMX, color = GT, shape = GT)) +
     geom_point(size = .5) +
-    scale_x_continuous(limits = c(0, NA), expand = expand_scale(mult = c(0, .05))) +
-    scale_y_continuous(limits = c(0, NA), expand = expand_scale(mult = c(0, .05))) +
+    scale_x_continuous(limits = c(0, NA), expand = expansion(mult = c(0, .05))) +
+    scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, .05))) +
     theme_bw(base_size = args$fontsize) +
     theme(legend.position = 'none')
   if (args$zcall) {
@@ -122,7 +117,7 @@ if (args$illumina) {
   }
   p3 <- ggplot(df, aes(x = THETA, y = R, color = GT, shape = GT)) +
     geom_point(size = .5) +
-    scale_x_continuous(limits = c(0,1), expand = expand_scale(0)) +
+    scale_x_continuous(limits = c(0,1), expand = expansion(0)) +
     theme_bw(base_size = args$fontsize) +
     theme(legend.position = 'none')
   for (gt in c('AA', 'AB', 'BB')) {
@@ -134,8 +129,8 @@ if (args$illumina) {
 } else if (args$affymetrix) {
   p2 <- ggplot(df, aes(x = NORMX, y = NORMY, color = GT, shape = GT)) +
     geom_point(size = .5) +
-    scale_x_continuous(limits = c(0, NA), expand = expand_scale(mult = c(0, .05))) +
-    scale_y_continuous(limits = c(0, NA), expand = expand_scale(mult = c(0, .05))) +
+    scale_x_continuous(limits = c(0, NA), expand = expansion(mult = c(0, .05))) +
+    scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, .05))) +
     theme_bw(base_size = args$fontsize) +
     theme(legend.position = 'none')
   p3 <- ggplot(df, aes(x = DELTA, y = SIZE, color = GT, shape = GT)) +

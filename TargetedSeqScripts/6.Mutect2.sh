@@ -21,15 +21,14 @@ declare -A miseqdir=( ["2019_09"]="2019_09" ["2019_12"]="2019_12" )
 declare -A mutect2=( ["2019_09"]="MiSeq_Results_out/Mutect2_out" ["2019_12"]="MiSeq_Results_out/Mutect2_out" )
 declare -A v2s=( ["2019_09"]="MiSeq_Results_out/4.V2_BAMs" ["2019_12"]="MiSeq_Results_out/4.V2_BAMs" )
 
-for pfx in 2019_09 2019_12; do
+#for pfx in 2019_09 2019_12; do
+for pfx in 2019_12; do
     miseqdir=${miseqdir[$pfx]}
     mutect2=${mutect2[$pfx]}
     v2s=${v2s[$pfx]}
     cd $miseqdir
     export INPUT_FILE=sm.txt
-    export INPUTDIR=$v2s
-    export OUTPUT=$mutect2
-    mkdir -p $OUTPUT
+    mkdir -p $mutect2
     sm_arr=( $(cat $INPUT_FILE) )
     n=${#sm_arr[@]}
     echo $n
@@ -37,8 +36,8 @@ for pfx in 2019_09 2019_12; do
 	sm_arr=( $(cat $INPUT_FILE) );
 	sm=${sm_arr[(($i-1))]};
 	$GATK Mutect2 --max-reads-per-alignment-start 0 --allow-non-unique-kmers-in-ref \
-	      -R $REFFA -I $INPUTDIR/$sm.v2.bam -O $OUTPUT/m2.$sm.GRCh38.vcf.gz \
-	      -L $BEDFILE --create-output-variant-index true
+	      -R $REFFA -I $v2s/$sm.v2.bam -O $mutect2/m2.$sm.GRCh38.vcf.gz \
+ 	      -L $BEDFILE --create-output-variant-index true
     done
 done
 
