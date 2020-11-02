@@ -1,18 +1,20 @@
 # Variant Calling Workflows
-This repository contains several variant calling workflows. The workflows are designed to identify variants from sequence data produced by several different types of NGS techonologies.
-![vc](misc/Pipeline-Images/variant_calling_workflow.png)
+This repository contains several variant calling workflows. The workflows are designed to identify variants from sequence data produced by several different types of NGS techonologies. The pipelines follow the rigorous standards described in the Genome Analysis Toolkit's (GATK) and the same general workflow depicted below:
 
-These pipelines follow the rigorous standards described in the Genome
-Analysis Toolkit's (GATK) ![best practices workflows](https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/best-practices-workflows).
+![](misc/Pipeline-Images/variant_calling_workflow.png)
 
 ### GATK's Best Practices Workflow for DNA-Seq Variant Calling
-![GBP](/misc/Pipeline-Images/variant-calling-pipeline.jpeg)
-
 The pipelines are ordered in a logical sequence for initial discovery of variants in a large cost effective SNP-array followed by validation of the variants via targeted sequencing. In order to perform cost effective targetded sequencing, thorough variant discovery practices are employed to reduce the number of false positive. The pipelines also differ in how the samples are considered which is desribed further in the individual sections for each workflow.
+
+![](https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/best-practices-workflows)
+
 
 # SNP-array Analysis Pipeline:
 ## This workflow was designed to use Illumina GSA SNP-array data as input
 This pipeline identifies variants from Illumina's Infinium GSA SNP-array IDAT files. The pipeline uses Illumina's proprietary iiap command-line software to convert the IDAT files to GTC files. The rest of the pipeline relies on bcftools plugins and the Genome Analysis Toolkit in order to annotate, phase, filter, and identify variants. The pipeline is more thoroughly described ![here](https://github.com/freeseek/gtc2vcf).
+
+![](/misc/Pipeline-Images/variant-calling-pipeline.jpeg)
+
 
 ### SNP-array Analysis Overview
 ![GVC](/misc/Pipeline-Images/gtc2vcf.png)
