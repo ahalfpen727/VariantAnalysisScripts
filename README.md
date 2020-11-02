@@ -1,13 +1,10 @@
 # Variant Calling Workflows
-This repository contains several variant calling workflows. The workflows are designed to identify variants from sequence data produced by several different types of NGS techonologies. The pipelines follow the rigorous standards described in the Genome Analysis Toolkit's (GATK) and the same general workflow depicted below:
-
+This repository contains several variant calling workflows. The workflows are designed to identify variants from sequence data produced by several different types of NGS techonologies. The pipelines follow the rigorous standards described in the refernce materail associated with the ![Genome Analysis Toolkit](https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/best-practices-workflows) and the same general workflow depicted below:
+ 
 ![](misc/Pipeline-Images/variant_calling_workflow.png)
 
 ### GATK's Best Practices Workflow for DNA-Seq Variant Calling
 The pipelines are ordered in a logical sequence for initial discovery of variants in a large cost effective SNP-array followed by validation of the variants via targeted sequencing. In order to perform cost effective targetded sequencing, thorough variant discovery practices are employed to reduce the number of false positive. The pipelines also differ in how the samples are considered which is desribed further in the individual sections for each workflow.
-
-![](https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/best-practices-workflows)
-
 
 # SNP-array Analysis Pipeline:
 ## This workflow was designed to use Illumina GSA SNP-array data as input
@@ -17,8 +14,6 @@ This pipeline identifies variants from Illumina's Infinium GSA SNP-array IDAT fi
 
 
 ### SNP-array Analysis Overview
-![GVC](/misc/Pipeline-Images/gtc2vcf.png)
-
 1) Convert IDAT to GTC (Illumina's iaap-cli gencall)
 2) Convert GTC to VCF (bcftools +gtc2vcf)
 3) Annotate variants (bcftools annotate)
@@ -30,15 +25,12 @@ This pipeline identifies variants from Illumina's Infinium GSA SNP-array IDAT fi
 9) Extract final tables
 10) Generate MoChA call plots (MoChA)
 
+![GVC](/misc/Pipeline-Images/gtc2vcf.png)
+
+
 # Targeted Sequencing Pipeline:
 ## This is a targeted sequencing variant anlysis workflow. This analysis requires I llumina MiSeq or Illumina NextSeq targeted sequencing data as input.
 This pipeline identifies variants from targeted sequencing data.For Data produced by an Illumina MiSeq can be input into this pipeline. Infinium GSA SNP array. The pipeline uses Illumina's proprietary iiap command line software to conver the IDAT files to GTCs. The rest of the pipeline relies on bcftools plugins and the Genome Analysis Toolkit in order to identify variants.
-
-### GATK's Germline Variant Discovery for Analysis of a Cohort of Samples
-![GVC](/misc/Pipeline-Images/Germline_Cohort_Variant_Discovery.png)
-
-### GATK's Germline Variant Discovery for Analysis of Individuals Samples
-![GVS](/misc/Pipeline-Images/Germline_Single_Sample_Variant_Discovery.png)
 
 1) Align data (BWA MEM)
 2) Remove duplicates (picard)
@@ -50,3 +42,11 @@ This pipeline identifies variants from targeted sequencing data.For Data produce
 8) Annotate variants (bcftools annotate & bcftools csq)
 9) Extract final table with ACMG59 (bcftools query)
 9) Generate IGV plots (IGV)
+
+
+### GATK's Germline Variant Discovery for Analysis of a Cohort of Samples
+![GVC](/misc/Pipeline-Images/Germline_Cohort_Variant_Discovery.png)
+
+### GATK's Germline Variant Discovery for Analysis of Individuals Samples
+![GVS](/misc/Pipeline-Images/Germline_Single_Sample_Variant_Discovery.png)
+
