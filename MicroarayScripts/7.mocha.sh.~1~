@@ -30,6 +30,8 @@ declare -A sam=( ["20180117"]="" ["20200110"]="" ["20200302"]="" ["20200319"]=""
 ###########################################################################
 ## RUN MOCHA                                                             ##
 ###########################################################################
+cd $GSADIR
+
 for pfx in 20180117 20200110; do
     wdir=${wdir[$pfx]}
     gsa=${gsa[$pfx]}
@@ -38,30 +40,28 @@ for pfx in 20180117 20200110; do
     egt=${egt[$pfx]}
     csv=${csv[$pfx]}
     sam=${sam[$pfx]}
-    cd $GSADIR/$wdir/
-    mkdir -p $mocha
-    awk -F"\t" 'NR>1 && $21>.9 {print $1}' $wdir.gtc.tsv | sed 's/\.gtc$//' | sort | \
-	join -t$'\t' - <(sort maps.tsv) | cut -f2 >  $wdir.pass
-    n=$(cat  $wdir.pass | wc -l);
+    mkdir -p $wdir/$mocha
+    awk -F"\t" 'NR>1 && $21>.9 {print $1}' $wdir/$wdir.tsv | sed 's/\.gtc$//' | sort | \
+	join -t$'\t' - <(sort $wdir/$wdir.tsv) | cut -f2 >  $wdir/$wdir.pass
+    n=$(cat  $wdir/$wdir.pass | wc -l);
     ns=$((n*98/100));
     print $n
     echo '##INFO=<ID=JK,Number=1,Type=Float,Description="Jukes Cantor">' | \
 	bcftools annotate --no-version -Ou -a $REFDUP -c CHROM,FROM,TO,JK -h /dev/stdin \
-		 -S $wdir.pass $mocha/$wdir.unphased.GRCh38.bcf | \
-#	bcftools +fill-tags --no-version -Ou -t ^Y,MT,chrY,chrM -- -t NS,ExcHet | \
-	bcftools +mochatools --no-version -Ou -- -x  $wdir/samples_list.txt -G | \
+		 -S  $wdir/$wdir.pass $mocha/$wdir.unphased.GRCh38.bcf | \
+	bcftools +fill-tags --no-version -Ou -t ^Y,MT,chrY,chrM -- -t NS,ExcHet | \
+	bcftools +mochatools --no-version -Ou -- -x  $wdir/$wdir.sex -G | \
 	bcftools annotate --no-version -Ob -o $mocha/$wdir.xcl.GRCh38.bcf \
 		 -i 'FILTER!="." && FILTER!="PASS" || JK<.02 || NS<'$ns' || ExcHet<1e-6 || AC_Sex_Test>6' \ -x FILTER,^INFO/JK,^INFO/NS,^INFO/ExcHet,^INFO/AC_Sex_Test && \
 	bcftools index -f $mocha/$wdir.xcl.GRCh38.bcf
     touch $mocha/$wdir.mocha.GRCh38.bcf
-    bcftools +mocha --no-version -Ob -o $mocha/$wdir.mocha.GRCh38.bcf --threads 1 --rules GRCh38 --variants ^$$mocha/$wdir.xcl.GRCh38.bcf -m $mocha/$wdir.tsv -g $mocha/$wdir.tsv -u $mocha/$wdir.ucsc.bed -p $REFCNP --LRR-weight 0.2 --LRR-GC-order 2 $mocha/$wdir.GRCh38.bcf && \
+    bcftools +mocha --no-version -Ob -o $mocha/$wdir.mocha.GRCh38.bcf --threads 1 --rules GRCh38 --variants ^$$mocha/$wdir.xcl.GRCh38.bcf -m $mocha/$wdir.tsv -g $mocha/$wdir.tsv -u $mocha/$wdir.ucsc.bed -p $REFCNP --LRR-weight 0.2 --order-LRR-GC 2 $mocha/$wdir.GRCh38.bcf && \
 	bcftools index $mocha/$wdir.mocha.GRCh38.bcf cat $mocha/$wdir.tsv | \
 	    awk -v pfx="$wdir" 'NR==1 {print $0"\tURL"}
     NR>1 && $21!~"CNP" && ($6>1e6 || $6>5e5 && $14<2) && ($16>50 || $17>20) {
-    print $0"\thttps://personal.broadinstitute.org/giulio/goodcell/$mocha/"pfx"."$1"_"$3"_"$4"_"$5".png"}' > $wdir.large.mocha.tsv
-    $SUMPR --stats $mocha/$wdir.tsv --calls $mocha/$wdir.mocha.tsv --pdf $wdir.summary.pdf
+    print $0"\thttps://personal.broadinstitute.org/giulio/goodcell/$mocha/"pfx"."$1"_"$3"_"$4"_"$5".png"}' > $wdir/$wdir.large.mocha.tsv
+    $SUMPR --stats $mocha/$wdir.tsv --calls $mocha/$wdir.mocha.tsv --pdf $wdir/$wdir.summary.pdf
     $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8033684140 --regions chr1:145696087-248956422
     $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test2.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8033684079 --regions chr15:19847685-101991189
     $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test3.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8037702308 --regions chr12:0-56613214
-    cd ../../
 done

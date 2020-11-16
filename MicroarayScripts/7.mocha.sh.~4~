@@ -41,20 +41,20 @@ for pfx in 20180117 20200110; do
     cd $GSADIR/$wdir/
     mkdir -p $mocha
     awk -F"\t" 'NR>1 && $21>.9 {print $1}' $wdir.gtc.tsv | sed 's/\.gtc$//' | sort | \
-	join -t$'\t' - <(sort maps.tsv) | cut -f2 >  $wdir.pass
+	join -t$'\t' - <(sort $wdir.tsv) | cut -f2 >  $wdir.pass
     n=$(cat  $wdir.pass | wc -l);
     ns=$((n*98/100));
     print $n
     echo '##INFO=<ID=JK,Number=1,Type=Float,Description="Jukes Cantor">' | \
 	bcftools annotate --no-version -Ou -a $REFDUP -c CHROM,FROM,TO,JK -h /dev/stdin \
 		 -S $wdir.pass $mocha/$wdir.unphased.GRCh38.bcf | \
-#	bcftools +fill-tags --no-version -Ou -t ^Y,MT,chrY,chrM -- -t NS,ExcHet | \
-	bcftools +mochatools --no-version -Ou -- -x  $wdir/samples_list.txt -G | \
+	bcftools +fill-tags --no-version -Ou -t ^Y,MT,chrY,chrM -- -t NS,ExcHet | \
+	bcftools +mochatools --no-version -Ou -- -x  $wdir.sex -G | \
 	bcftools annotate --no-version -Ob -o $mocha/$wdir.xcl.GRCh38.bcf \
 		 -i 'FILTER!="." && FILTER!="PASS" || JK<.02 || NS<'$ns' || ExcHet<1e-6 || AC_Sex_Test>6' \ -x FILTER,^INFO/JK,^INFO/NS,^INFO/ExcHet,^INFO/AC_Sex_Test && \
 	bcftools index -f $mocha/$wdir.xcl.GRCh38.bcf
     touch $mocha/$wdir.mocha.GRCh38.bcf
-    bcftools +mocha --no-version -Ob -o $mocha/$wdir.mocha.GRCh38.bcf --threads 1 --rules GRCh38 --variants ^$$mocha/$wdir.xcl.GRCh38.bcf -m $mocha/$wdir.tsv -g $mocha/$wdir.tsv -u $mocha/$wdir.ucsc.bed -p $REFCNP --LRR-weight 0.2 --LRR-GC-order 2 $mocha/$wdir.GRCh38.bcf && \
+    bcftools +mocha --no-version -Ob -o $mocha/$wdir.mocha.GRCh38.bcf --threads 1 --rules GRCh38 --variants ^$$mocha/$wdir.xcl.GRCh38.bcf -m $mocha/$wdir.tsv -g $mocha/$wdir.tsv -u $mocha/$wdir.ucsc.bed -p $REFCNP --LRR-weight 0.2 --order-LRR-GC 2 $mocha/$wdir.GRCh38.bcf && \
 	bcftools index $mocha/$wdir.mocha.GRCh38.bcf cat $mocha/$wdir.tsv | \
 	    awk -v pfx="$wdir" 'NR==1 {print $0"\tURL"}
     NR>1 && $21!~"CNP" && ($6>1e6 || $6>5e5 && $14<2) && ($16>50 || $17>20) {

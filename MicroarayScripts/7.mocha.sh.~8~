@@ -49,7 +49,7 @@ for pfx in 20180117 20200110; do
 	bcftools annotate --no-version -Ou -a $REFDUP -c CHROM,FROM,TO,JK -h /dev/stdin \
 		 -S $wdir.pass $mocha/$wdir.unphased.GRCh38.bcf | \
 #	bcftools +fill-tags --no-version -Ou -t ^Y,MT,chrY,chrM -- -t NS,ExcHet | \
-	bcftools +mochatools --no-version -Ou -- -x  $wdir/samples_list.txt -G | \
+	bcftools +mochatools --no-version -Ou -- -x  $wdir.sex -G | \
 	bcftools annotate --no-version -Ob -o $mocha/$wdir.xcl.GRCh38.bcf \
 		 -i 'FILTER!="." && FILTER!="PASS" || JK<.02 || NS<'$ns' || ExcHet<1e-6 || AC_Sex_Test>6' \ -x FILTER,^INFO/JK,^INFO/NS,^INFO/ExcHet,^INFO/AC_Sex_Test && \
 	bcftools index -f $mocha/$wdir.xcl.GRCh38.bcf
