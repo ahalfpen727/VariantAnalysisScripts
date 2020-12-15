@@ -4,8 +4,8 @@
 ###########################################################################
 # see https://github.com/freeseek/mocha
 export REFDIR=/media/drew/easystore/ReferenceGenomes
-export GSADIR=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/GSA_Data
-export ANYLDIR=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/
+export GSADIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/GSA_Data
+export ANYLDIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/
 export ARYDIR=$ANYLDIR/VariantAnalysisScripts/MicroarayScripts/
 export MOCHR=$ARYDIR/mocha_plot.R
 export GTC2VCF=$ARYDIR/gtc2vcf_plot.R
@@ -18,7 +18,6 @@ export REFMAP=$REFDIR/GRCh38/genetic_map_hg38_withX.gz
 export REFDUP=$REFDIR/GRCh38/dup.grch38.bed.gz
 export REFCNP=$REFDIR/GRCh38/cnp.grch38.bed.gz
 export REFCYTO=$REFDIR/GRCh38/cytoBand.hg38.txt.gz
-cd $GSADIR
 
 declare -A gsa=(  ["20180117"]="GSA-24v1_0"  ["20200110"]="GSA_24v2_0" )
 declare -A mocha=(  ["20180117"]="Mocha_out"  ["20200110"]="Mocha_out" )
@@ -51,7 +50,8 @@ for pfx in 20180117 20200110; do
     csv=${csv[$pfx]}
     sam=${sam[$pfx]}
     mkdir -p $wdir/$mocha
-    bcftools annotate --no-version -Ou -x FILTER,^INFO/ALLELE_A,^INFO/ALLELE_B,^FMT/GT,^FMT/BAF,^FMT/LRR $wdir/$wdir.clinvar.GRCh38.bcf |\
-	bcftools norm --no-version -d none -Ob -o $wdir/$mocha/$wdir.unphased.GRCh38.bcf && \
-	bcftools index -f $wdir/$mocha/$wdir.unphased.GRCh38.bcf
+    export VCFDIR=$wdir/BCF_and_VCF_Files/
+    bcftools annotate --no-version -Ou -x ID,QUAL,FILTER,^INFO/ALLELE_A,^INFO/ALLELE_B,^INFO/GC,^FMT/GT,^FMT/BAF,^FMT/LRR $VCFDIR/$wdir.clinvar.GRCh38.bcf |\
+	bcftools norm --no-version -d none -Ob -o $VCFDIR/$wdir.unphased.GRCh38.bcf && \
+	bcftools index -f $VCFDIR/$wdir.unphased.GRCh38.bcf
 done

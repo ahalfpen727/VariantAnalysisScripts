@@ -3,12 +3,12 @@
 ###########################################################################
 # set env variables for index locations
 ###########################################################################
-export GSADIR=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/GSA_Data
+export GSADIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/GSA_Data
 export MEGADIR=/media/drew/easystore/ReferenceGenomes/MEGA_8v2_0
 export REFDIR=/media/drew/easystore/ReferenceGenomes
-export INDEXDIR=$REF_DIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
-export REFFA=$INDEX_DIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
-export REFFAI=$INDEX_DIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
+export INDEXDIR=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
+export REFFA=$INDEXDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+export REFFAI=$INDEXDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
 
 ###########################################################################
 # CONVERT DATA FROM GTC TO VCF
@@ -42,10 +42,10 @@ for pfx in 20180117 20200110; do
 	bcftools +gtc2vcf --no-version -Ou -f $REFFA -b "$bpm" -c $csv -e "$egt" -g GTCs  \
 		 -x $pfx.sex;
     fi | \
-	bcftools sort -Ou -T ./bcftools-sort.XXXXXX | \
-	bcftools reheader -s $pfx.map.tsv | \
-	bcftools norm --no-version -Ob -o $wdir.$gsa.GRCh38.bcf -f $REFFA -c x && \
-	bcftools index -f $wdir.$gsa.GRCh38.bcf
+    bcftools sort -Ou -T ./bcftools-sort.XXXXXX | \
+    bcftools reheader -s $wdir.gtc.tsv | \
+    bcftools norm --no-version -Ob -o $wdir.$gsa.GRCh38.bcf -f $REFFA -c x && \
+    bcftools index -f $wdir.$gsa.GRCh38.bcf
 done
 
 

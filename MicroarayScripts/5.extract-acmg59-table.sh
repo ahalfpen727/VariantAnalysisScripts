@@ -3,8 +3,8 @@
 ##########################################################################
 # set env variable and link ref files
 ###########################################################################
-export ANALYSIS=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir
-export GSADIR=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/GSA_Data
+export ANALYSIS=/media/drew/easystore/Current-Analysis/AnalysisBaseDir
+export GSADIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/GSA_Data
 export REFDIR=/media/drew/easystore/ReferenceGenomes
 export REFIDX=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
 export REFFA=$REFIDX/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
@@ -46,16 +46,18 @@ for pfx in 20180117 20200110; do
     sam=${sam[$pfx]}
     opt=${opts[$pfx]}
     export GSA_DIR=$GSADIR/$wdir
+    mkdir -p $GSA_DIR/BCF_and_VCF_Files
+    export VCFOUT=$GSA_DIR/BCF_and_VCF_Files
     cd $GSA_DIR
     (echo -e "$hdr"; \
-     bcftools view --no-version -Ou -c 1 -i 'CLNDN!="." && (CLNSIG=="Pathogenic" || CLNSIG=="Likely_pathogenic" || CLNSIG=="Pathogenic/Likely_pathogenic") && ID!="rs59684335" && ID!="seq-rs786202200" && ID!="seq-rs797045904" &&  ID!="seq-rs730880361" && ID!="seq-rs727503172" && ID!="seq-rs397515087" && ID!="seq-rs587779333.1" && ID!="rs80357962" && ID!="rs886040223"' $wdir.clinvar.GRCh38.bcf |
+     bcftools view --no-version -Ou -c 1 -i 'CLNDN!="." && (CLNSIG=="Pathogenic" || CLNSIG=="Likely_pathogenic" || CLNSIG=="Pathogenic/Likely_pathogenic") && ID!="rs59684335" && ID!="seq-rs786202200" && ID!="seq-rs797045904" &&  ID!="seq-rs730880361" && ID!="seq-rs727503172" && ID!="seq-rs397515087" && ID!="seq-rs587779333.1" && ID!="rs80357962" && ID!="rs886040223"' $VCFOUT/$wdir.clinvar.GRCh38.bcf |
 	 bcftools query $opt -f "$fmt" -i 'GT!="./." & GT!="0/0"' | awk -v pfx="$wdir" 'NR==FNR {x[$1]++} NR>FNR {split($19,a,"|"); for (i in a) {split(a[i],b,":"); if (b[1] in x) print $0"\thttps://personal.broadinstitute.org/giulio/goodcell/mocha/"pfx"."$6".png"}}' $ACMG59 -) | grep -v ^203533890075 > $pfx.acmg59.tsv
     mkdir -p pngs
     for snp in chr19:44908684:rs429358 chr7:6009019:seq-rs587779333.1 chr17:43092919:rs80357962 chr17:43082452:rs886040223 $(tail -n+2 $wdir.acmg59.tsv | cut -f4-6 | tr '\t' ':' | sort | uniq); do
 	chr=$(echo $snp | cut -d: -f1)
 	pos=$(echo $snp | cut -d: -f2)
 	id=$(echo $snp | cut -d: -f3)
-	$RSCRIPT --illumina --vcf $wdir.clinvar.GRCh38.bcf --chrom $chr --pos $pos --id $id --png pngs/$wdir.$id.png
+	$RSCRIPT --illumina --vcf $VCFOUT/$wdir.clinvar.GRCh38.bcf --chrom $chr --pos $pos --id $id --png pngs/$wdir.$id.png
     done
 done
 

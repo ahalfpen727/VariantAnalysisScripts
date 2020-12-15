@@ -18,7 +18,6 @@ export REFMAP=$REFDIR/GRCh38/genetic_map_hg38_withX.gz
 export REFDUP=$REFDIR/GRCh38/dup.grch38.bed.gz
 export REFCNP=$REFDIR/GRCh38/cnp.grch38.bed.gz
 export REFCYTO=$REFDIR/GRCh38/cytoBand.hg38.txt.gz
-cd $GSADIR
 
 declare -A gsa=(  ["20180117"]="GSA-24v1_0"  ["20200110"]="GSA_24v2_0" )
 declare -A mocha=(  ["20180117"]="Mocha_out"  ["20200110"]="Mocha_out" )
@@ -50,41 +49,41 @@ for pfx in 20180117 20200110; do
     egt=${egt[$pfx]}
     csv=${csv[$pfx]}
     sam=${sam[$pfx]}
-    cd $wdir
     mkdir -p $mocha
+    export MDIR=$wdir/$mocha
     awk -F"\t" 'NR>1 && $21>.9 {print $1}' $wdir.gtc.tsv | sed 's/\.gtc$//' | sort | join -t$'\t' - <(sort map.tsv) | cut -f2 > $wdir.pass
     n=$(cat $wdir.pass | wc -l);
     ns=$((n*98/100));
     echo '##INFO=<ID=JK,Number=1,Type=Float,Description="Jukes Cantor">' | \
-	bcftools annotate --no-version -Ou -a $REFDUP -c CHROM,FROM,TO,JK -h /dev/stdin -S $wdir.pass $mocha/$wdir.unphased.GRCh38.bcf | \
+	bcftools annotate --no-version -Ou -a $REFDUP -c CHROM,FROM,TO,JK -h /dev/stdin -S $wdir.pass $MDIR/$wdir.unphased.GRCh38.bcf | \
 	bcftools +fill-tags --no-version -Ou -t ^Y,MT,chrY,chrM -- -t NS,ExcHet | \
 	bcftools +mochatools --no-version -Ou -- -x $wdir.sex -G | \
-	bcftools annotate --no-version -Ob -o $mocha/$wdir.xcl.GRCh38.bcf \
+	bcftools annotate --no-version -Ob -o $MDIR/$wdir.xcl.GRCh38.bcf \
 		 -i 'FILTER!="." && FILTER!="PASS" || JK<.02 || NS<'$ns' || ExcHet<1e-6 || AC_Sex_Test>6' \
 		 -x FILTER,^INFO/JK,^INFO/NS,^INFO/ExcHet,^INFO/AC_Sex_Test && \
-	bcftools index -f $mocha/$wdir.xcl.GRCh38.bcf
+	bcftools index -f $MDIR/$wdir.xcl.GRCh38.bcf
     kgp_pfx="$REFDIR/ALL.chrs_GRCh38.genotypes.20170504.bcfs/ALL.chr"
     kgp_sfx="_GRCh38.genotypes.20170504"
     for chr in {1..22} X; do
-	$eagle --geneticMapFile $REFMAP --outPrefix $mocha/$wdir.chr$chr.GRCh38 --numThreads 2 --vcfRef $kgp_pfx${chr}$kgp_sfx.bcf --vcfTarget $mocha/$wdir.unphased.GRCh38.bcf --vcfOutFormat b --noImpMissing \
-	      --outputUnphased --vcfExclude $mocha/$wdir.xcl.GRCh38.bcf --chrom $chr --pbwtIters 3 && bcftools index -f $mocha/$wdir.chr$chr.GRCh38.bcf
+	$eagle --geneticMapFile $REFMAP --outPrefix $MDIR/$wdir.chr$chr.GRCh38 --numThreads 2 --vcfRef $kgp_pfx${chr}$kgp_sfx.bcf --vcfTarget $MDIR/$wdir.unphased.GRCh38.bcf --vcfOutFormat b --noImpMissing \
+	      --outputUnphased --vcfExclude $MDIR/$wdir.xcl.GRCh38.bcf --chrom $chr --pbwtIters 3 && bcftools index -f $MDIR/$wdir.chr$chr.GRCh38.bcf
     done
-    bcftools view --no-version -Ob -o $mocha/$wdir.other.GRCh38.bcf -t ^$(seq -s, 1 22),X,$(seq -f chr%.0f -s, 1 22),chrX $mocha/$wdir.unphased.GRCh38.bcf && \
-	bcftools index $mocha/$wdir.other.GRCh38.bcf
-    bcftools concat --no-version -Ou $mocha/$wdir.{chr{{1..22},X},other}.GRCh38.bcf | \
-	bcftools +mochatools --no-version -Ob -o $mocha/$wdir.GRCh38.bcf -- -f $REFFA && \
-	bcftools index $mocha/$wdir.GRCh38.bcf
-    bcftools +mocha --no-version -Ob -o $mocha/$wdir.mocha.GRCh38.bcf --threads 1 --rules GRCh38 --variants ^$$mocha/$wdir.xcl.GRCh38.bcf -m $mocha/$wdir.mocha.tsv -g $mocha/$wdir.stats.tsv \
-	     -u $mocha/$wdir.ucsc.bed -p $REFCNP --LRR-weight 0.2 --order-LRR-GC 2 $mocha/$wdir.GRCh38.bcf && \
-	bcftools index $mocha/$wdir.mocha.GRCh38.bcf
-    cat $mocha/$wdir.mocha.tsv | awk -v pfx="$pfx" 'NR==1 {print $0"\tURL"} \
+    bcftools view --no-version -Ob -o $MDIR/$wdir.other.GRCh38.bcf -t ^$(seq -s, 1 22),X,$(seq -f chr%.0f -s, 1 22),chrX $MDIR/$wdir.unphased.GRCh38.bcf && \
+	bcftools index $MDIR/$wdir.other.GRCh38.bcf
+    bcftools concat --no-version -Ou $MDIR/$wdir.{chr{{1..22},X},other}.GRCh38.bcf | \
+	bcftools +mochatools --no-version -Ob -o $MDIR/$wdir.GRCh38.bcf -- -f $REFFA && \
+	bcftools index $MDIR/$wdir.GRCh38.bcf
+    bcftools +mocha --no-version -Ob -o $MDIR/$wdir.mocha.GRCh38.bcf --threads 1 --rules GRCh38 --variants ^$$MDIR/$wdir.xcl.GRCh38.bcf -m $MDIR/$wdir.mocha.tsv -g $MDIR/$wdir.stats.tsv \
+	     -u $MDIR/$wdir.ucsc.bed -p $REFCNP --LRR-weight 0.2 --order-LRR-GC 2 $MDIR/$wdir.GRCh38.bcf && \
+	bcftools index $MDIR/$wdir.mocha.GRCh38.bcf
+    cat $MDIR/$wdir.mocha.tsv | awk -v pfx="$pfx" 'NR==1 {print $0"\tURL"} \
     	NR>1 && $21!~"CNP" && ($6>1e6 || $6>5e5 && $14<2) && ($16>50 || $17>20) \
-	{print $0"\thttps://personal.broadinstitute.org/giulio/goodcell/$mocha/"pfx"."$1"_"$3"_"$4"_"$5".png"}' > $wdir.large.mocha.tsv
-    ln -s $mocha/$wdir.stats.tsv
-    $SUMPR --stats $mocha/$wdir.stats.tsv --calls $mocha/$wdir.mocha.tsv --pdf $wdir.summary.pdf
-    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8033684140 --regions chr1:145696087-248956422
-    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test2.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8033684079 --regions chr15:19847685-101991189
-    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test3.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8037702308 --regions chr12:0-56613214
+	{print $0"\thttps://personal.broadinstitute.org/giulio/goodcell/$mocha/"pfx"."$1"_"$3"_"$4"_"$5".png"}' > $MDIR/$wdir.large.mocha.tsv
+    ln -s $MDIR/$wdir.stats.tsv
+    $SUMPR --stats $MDIR/$wdir.stats.tsv --calls $MDIR/$wdir.mocha.tsv --pdf $MDIR/$wdir.summary.pdf
+    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test.png --vcf $MDIR/$wdir.mocha.GRCh38.bcf --samples 8033684140 --regions chr1:145696087-248956422
+    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test2.png --vcf $MDIR/$wdir.mocha.GRCh38.bcf --samples 8033684079 --regions chr15:19847685-101991189
+    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test3.png --vcf $MDIR/$wdir.mocha.GRCh38.bcf --samples 8037702308 --regions chr12:0-56613214
 done
 
 

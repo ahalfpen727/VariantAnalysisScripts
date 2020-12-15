@@ -4,8 +4,8 @@
 ###########################################################################
 # see https://github.com/freeseek/mocha
 export REFDIR=/media/drew/easystore/ReferenceGenomes
-export GSADIR=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/GSA_Data
-export ANYLDIR=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/
+export GSADIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/GSA_Data
+export ANYLDIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/
 export ARYDIR=$ANYLDIR/VariantAnalysisScripts/MicroarayScripts/
 export MOCHR=$ARYDIR/mocha_plot.R
 export GTC2VCF=$ARYDIR/gtc2vcf_plot.R
@@ -38,8 +38,8 @@ for pfx in 20180117 20200110; do
     egt=${egt[$pfx]}
     csv=${csv[$pfx]}
     sam=${sam[$pfx]}
-    cd $GSADIR/$wdir/
     mkdir -p $mocha
+    export MDIR=$GSADIR/$wdir/$mocha
     awk -F"\t" 'NR>1 && $21>.9 {print $1}' $wdir.gtc.tsv | sed 's/\.gtc$//' | sort | \
 	join -t$'\t' - <(sort maps.tsv) | cut -f2 >  $wdir.pass
     n=$(cat  $wdir.pass | wc -l);
@@ -47,21 +47,20 @@ for pfx in 20180117 20200110; do
     print $n
     echo '##INFO=<ID=JK,Number=1,Type=Float,Description="Jukes Cantor">' | \
 	bcftools annotate --no-version -Ou -a $REFDUP -c CHROM,FROM,TO,JK -h /dev/stdin \
-		 -S $wdir.pass $mocha/$wdir.unphased.GRCh38.bcf | \
+		 -S $wdir.pass $MDIR/$wdir.unphased.GRCh38.bcf | \
 #	bcftools +fill-tags --no-version -Ou -t ^Y,MT,chrY,chrM -- -t NS,ExcHet | \
 	bcftools +mochatools --no-version -Ou -- -x  $wdir/samples_list.txt -G | \
-	bcftools annotate --no-version -Ob -o $mocha/$wdir.xcl.GRCh38.bcf \
+	bcftools annotate --no-version -Ob -o $MDIR/$wdir.xcl.GRCh38.bcf \
 		 -i 'FILTER!="." && FILTER!="PASS" || JK<.02 || NS<'$ns' || ExcHet<1e-6 || AC_Sex_Test>6' \ -x FILTER,^INFO/JK,^INFO/NS,^INFO/ExcHet,^INFO/AC_Sex_Test && \
-	bcftools index -f $mocha/$wdir.xcl.GRCh38.bcf
-    touch $mocha/$wdir.mocha.GRCh38.bcf
-    bcftools +mocha --no-version -Ob -o $mocha/$wdir.mocha.GRCh38.bcf --threads 1 --rules GRCh38 --variants ^$$mocha/$wdir.xcl.GRCh38.bcf -m $mocha/$wdir.tsv -g $mocha/$wdir.tsv -u $mocha/$wdir.ucsc.bed -p $REFCNP --LRR-weight 0.2 --LRR-GC-order 2 $mocha/$wdir.GRCh38.bcf && \
-	bcftools index $mocha/$wdir.mocha.GRCh38.bcf cat $mocha/$wdir.tsv | \
+	bcftools index -f $MDIR/$wdir.xcl.GRCh38.bcf
+    touch $MDIR/$wdir.mocha.GRCh38.bcf
+    bcftools +mocha --no-version -Ob -o $MDIR/$wdir.mocha.GRCh38.bcf --threads 1 --rules GRCh38 --variants ^$$MDIR/$wdir.xcl.GRCh38.bcf -m $MDIR/$wdir.tsv -g $MDIR/$wdir.tsv -u $MDIR/$wdir.ucsc.bed -p $REFCNP --LRR-weight 0.2 --LRR-GC-order 2 $MDIR/$wdir.GRCh38.bcf && \
+	bcftools index $MDIR/$wdir.mocha.GRCh38.bcf cat $MDIR/$wdir.tsv | \
 	    awk -v pfx="$wdir" 'NR==1 {print $0"\tURL"}
     NR>1 && $21!~"CNP" && ($6>1e6 || $6>5e5 && $14<2) && ($16>50 || $17>20) {
-    print $0"\thttps://personal.broadinstitute.org/giulio/goodcell/$mocha/"pfx"."$1"_"$3"_"$4"_"$5".png"}' > $wdir.large.mocha.tsv
-    $SUMPR --stats $mocha/$wdir.tsv --calls $mocha/$wdir.mocha.tsv --pdf $wdir.summary.pdf
-    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8033684140 --regions chr1:145696087-248956422
-    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test2.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8033684079 --regions chr15:19847685-101991189
-    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test3.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8037702308 --regions chr12:0-56613214
-    cd ../../
+    print $0"\thttps://personal.broadinstitute.org/giulio/goodcell/$mocha/"pfx"."$1"_"$3"_"$4"_"$5".png"}' > $MDIR/$wdir.large.mocha.tsv
+    $SUMPR --stats $MDIR/$wdir.tsv --calls $MDIR/$wdir.mocha.tsv --pdf $MDIR/$wdir.summary.pdf
+    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test.png --vcf $MDIR/$wdir.mocha.GRCh38.bcf --samples 8033684140 --regions chr1:145696087-248956422
+    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test2.png --vcf $MDIR/$wdir.mocha.GRCh38.bcf --samples 8033684079 --regions chr15:19847685-101991189
+    $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test3.png --vcf $MDIR/$wdir.mocha.GRCh38.bcf --samples 8037702308 --regions chr12:0-56613214
 done
