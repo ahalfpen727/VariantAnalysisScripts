@@ -23,8 +23,8 @@ declare -A miseqdir=( ["2019_09"]="2019_09" ["2019_12"]="2019_12" )
 declare -A mutect2=( ["2019_09"]="MiSeq_Results_out/Mutect2_out" ["2019_12"]="MiSeq_Results_out/Mutect2_out" )
 declare -A v2s=( ["2019_09"]="MiSeq_Results_out/4.V2_BAMs" ["2019_12"]="MiSeq_Results_out/4.V2_BAMs" )
 
-#for pfx in 2019_09 2019_12; do
-for pfx in 2019_12; do
+for pfx in 2019_09 2019_12; do
+#for pfx in 2019_12; do
     miseqdir=${miseqdir[$pfx]}
     mutect2=${mutect2[$pfx]}
     v2s=${v2s[$pfx]}

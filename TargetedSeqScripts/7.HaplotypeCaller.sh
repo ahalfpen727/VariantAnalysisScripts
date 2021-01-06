@@ -4,7 +4,7 @@
 # Export Env Variables
 ###########################################################################
 
-export GATK=$HOME/toolbin/gatk-4.1.8.1/gatk
+export GATK=$HOME/toolbin/gatk-4.1.9.0/gatk
 export REFDIR=/media/drew/easystore/ReferenceGenomes/
 export BEDDIR=$REFDIR/BEDs
 export BEDFILE=$BEDDIR/3215481_Covered.GRCh38.bed
@@ -22,13 +22,13 @@ declare -A miseqdir=( ["2019_09"]="2019_09" ["2019_12"]="2019_12" )
 declare -A miseqout=(["2019_09"]="MiSeq_Results_out" ["2019_12"]="MiSeq_Results_out" )
 declare -A mutect2=( ["2019_09"]="Mutect2_out" ["2019_12"]="Mutect2_out" )
 declare -A hcs=( ["2019_09"]="Haplotype-Caller" ["2019_12"]="Haplotype-Caller" )
-declare -A sms=( ["2019_09"]="3.GRP_BAMs" ["2019_12"]="3.GRP_BAMs" )
+declare -A sms=( ["2019_09"]="4.V2_BAMs" ["2019_12"]="4.V2_BAMs" )
 
 for pfx in 2019_09 2019_12; do
     miseqdir=${miseqdir[$pfx]}
     miseqout=${miseqout[$pfx]}
     mutect2=${mutect2[$pfx]}
-    hcs=${v2s[$pfx]}
+    hcs=${hcs[$pfx]}
     sms=${sms[$pfx]}
     cd $miseqdir
     mkdir -p $miseqout/$mutect2
@@ -43,7 +43,7 @@ for pfx in 2019_09 2019_12; do
 	sm_arr=( $(cat $INPUT_FILE) );
 	sm=${sm_arr[(($i-1))]};
 	$GATK HaplotypeCaller --max-reads-per-alignment-start 0 -R $REFFA \
-	      -I $INPUTDIR/$sm.v2.bam -O $OUTPUT/hc.$sm.GRCh38.vcf.gz -L $NEWBED \
+	      -I $INPUTDIR/$sm.v2.bam -O $OUTPUT/hc.$sm.GRCh38.vcf.gz -L $BEDFILE \
 	      --create-output-variant-index true
     done
 done
