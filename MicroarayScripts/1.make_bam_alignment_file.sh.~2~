@@ -23,7 +23,8 @@ for pfx in 20180117 20200110; do
     csv=${csv[$pfx]}
     export WORK_DIR=$WORKDIR/$wdir
     mkdir -p $WORK_DIR/BAM_DIR
-    export BAMDIR=$WORK_DIR/BAM_DIR
+    export $BAMDIR=$WORK_DIR/BAM_DIR
+    cd $WORK_DIR
     touch $BAMDIR/$gsa.alignment_file.bam
     export BAMFILE=$BAMDIR/$gsa.alignment_file.bam
     bcftools +gtc2vcf -c $csv --fasta-flank | \

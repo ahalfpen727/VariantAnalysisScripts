@@ -12,7 +12,7 @@ export BEDFILE=$BEDDIR/3215481_Covered.bed
 export IDXDIR=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
 export REFFA=$IDXDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 export REFFAI=$IDXDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
-export WORKDIR=/media/drew/easystore/GoodCell-Resources/AnalysisBaseDir/MiSeq_Data
+export WORKDIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/MiSeq_Data
 ###########################################################################
 ## COMPUTE COVERAGE OVER TARGETS                                         ##
 ###########################################################################
@@ -27,9 +27,11 @@ for pfx in 2019_09 2019_12; do
     datadir=${datadir[$pfx]}
     coverage=${coverage[$pfx]}
     cd $WORKDIR/$miseqdir
-    export INPUT_FILE=sm.txt
+    export INPUT_FILE=$WORKDIR/$miseqdir/sm.txt
+    export OUTPUT=$WORKDIR/$miseqdir/$coverage
+    mkdir -p $OUTPUT
+    touch $OUTPUT/$sm.cov
     export INPUTDIR=$datadir
-    export OUTPUT=$coverage
     sm_arr=( $(cat $INPUT_FILE) )
     n=${#sm_arr[@]}
     echo $n
@@ -43,5 +45,5 @@ for pfx in 2019_09 2019_12; do
     done
     (echo -en "CHROM\tBEG\tEND\tNAME\t"; tr '\n' '\t' < sm.txt | sed 's/\t$/\n/'; \
      paste $BEDFILE $(cat sm.txt | sed 's/$/.cov/' | tr '\n' '\t' | sed 's/\t$/\n/')) \
-	>  $BEDDIR/3215481_Covered.GRCh38.tsv
+	>  $OUTPUT/3215481_Covered.GRCh38.tsv
 done

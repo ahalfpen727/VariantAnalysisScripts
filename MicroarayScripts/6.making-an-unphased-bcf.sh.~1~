@@ -50,8 +50,8 @@ for pfx in 20180117 20200110; do
     csv=${csv[$pfx]}
     sam=${sam[$pfx]}
     mkdir -p $wdir/$mocha
-    export VCFDIR=$wdir/BCF_and_VCF_Files/
-    bcftools annotate --no-version -Ou -x ID,QUAL,FILTER,^INFO/ALLELE_A,^INFO/ALLELE_B,^INFO/GC,^FMT/GT,^FMT/BAF,^FMT/LRR $VCFDIR/$wdir.clinvar.GRCh38.bcf |\
+    export VCFDIR=$wdir/BCF_and_VCF_Files
+    bcftools annotate --no-version -Ou -x ID,QUAL,FILTER,^INFO/ALLELE_A,^INFO/ALLELE_B,^INFO/GC,^FMT/GT,^FMT/BAF,^FMT/LRR $wdir/$wdir.clinvar.GRCh38.bcf |\
 	bcftools norm --no-version -d none -Ob -o $VCFDIR/$wdir.unphased.GRCh38.bcf && \
 	bcftools index -f $VCFDIR/$wdir.unphased.GRCh38.bcf
 done
