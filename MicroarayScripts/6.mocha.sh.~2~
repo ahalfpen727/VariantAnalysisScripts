@@ -4,7 +4,7 @@
 ###########################################################################
 # see https://github.com/freeseek/mocha
 export REFDIR=/media/drew/easystore/ReferenceGenomes
-export MOCHADIR=$REFDIR/GRCh38/Mocha_Files
+export MOCHADIR=$REFDIR/Mocha_Files
 export GSADIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/GSA_Data
 export ANYLDIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/
 export ARYDIR=$ANYLDIR/VariantAnalysisScripts/MicroarayScripts/

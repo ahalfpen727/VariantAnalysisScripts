@@ -31,9 +31,8 @@ for pfx in 2019_09 2019_12; do
     hcs=${hcs[$pfx]}
     sms=${sms[$pfx]}
     cd $miseqdir
-    mkdir -P $miseqout/$mutect2
-    mkdir -P $miseqout/$sms
-    mkdir -P $miseqout/$hcs
+    mkdir -p $miseqout/$mutect2
+    mkdir -p $miseqout/$hcs
     export INPUT_FILE=sm.txt
     export INPUTDIR=$miseqout/$sms
     export OUTPUT=$miseqout/$hcs

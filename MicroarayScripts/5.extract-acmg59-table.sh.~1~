@@ -6,9 +6,9 @@
 export ANALYSIS=/media/drew/easystore/Current-Analysis/AnalysisBaseDir
 export GSADIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/GSA_Data
 export REFDIR=/media/drew/easystore/ReferenceGenomes
-export REFIDX=$REFDIR/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set
-export REFFA=$REFIDX/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
-export REFGFF=$REFDIR/GRCh38/Ensembl/Homo_sapiens.GRCh38.fixed.101.gff3.gz
+export REFIDX=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
+export REFFA=$REFIDX/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+export REFGFF=$REFDIR/Ensembl/Homo_sapiens.GRCh38.fixed.101.gff3.gz
 export CLINVCF=$REFDIR/GRCh38/clinvar_20200810.vcf.gz
 export CLINTBI=$REFDIR/GRCh38/clinvar_20200810.vcf.gz.tbi
 export G1000VCF=$REFDIR/GRCh38/1000G_phase1.snps.high_confidence.hg38.vcf.gz
@@ -20,10 +20,10 @@ export RSCRIPT=$ANALYSIS/VariantAnalysisScripts/MicroarayScripts/gtc2vcf_plot.R
 
 declare -A gsa=(  ["20180117"]="GSA-24v1_0"  ["20200110"]="GSA_24v2_0" )
 declare -A wdir=( ["20180117"]="2018_07" ["20200110"]="2020_01" )
-declare -A bpm=( ["20180117"]="$REFDIR/GRCh38/GSA_24v1_0/GSA-24v1-0_A2.bpm" ["20200110"]="$REFDIR/GRCh38/GSA_24v2_0/GSA-24v2-0_A2.bpm" )
-declare -A egt=( ["20180117"]="$REFDIR/GRCh38/GSA_24v1_0/GSA-24v1-0_A1_ClusterFile.egt" ["20200110"]="$REFDIR/GRCh38/GSA_24v2_0/GSA-24v2-0_A1_ClusterFile.egt" )
-declare -A csv=( ["20180117"]="$REFDIR/GRCh38/GSA_24v1_0/GSA-24v1-0_A2.csv"  ["20200110"]="$REFDIR/GRCh38/GSA_24v2_0/GSA-24v2-0_A2.csv" )
-declare -A sam=( ["20180117"]="" ["20200110"]="" ["20200302"]="" ["20200319"]="" ["20200320"]="$REFDIR/GRCh38/MEGA_8v2_0/CCPMBiobankMEGA2_20002558X3451\83_A1.bam" )
+declare -A bpm=( ["20180117"]="$REFDIR/GSA_24v1_0/GSA-24v1-0_A2.bpm" ["20200110"]="$REFDIR/GSA_24v2_0/GSA-24v2-0_A2.bpm" )
+declare -A egt=( ["20180117"]="$REFDIR/GSA_24v1_0/GSA-24v1-0_A1_ClusterFile.egt" ["20200110"]="$REFDIR/GSA_24v2_0/GSA-24v2-0_A1_ClusterFile.egt" )
+declare -A csv=( ["20180117"]="$REFDIR/GSA_24v1_0/GSA-24v1-0_A2.csv"  ["20200110"]="$REFDIR/GSA_24v2_0/GSA-24v2-0_A2.csv" )
+declare -A sam=( ["20180117"]="" ["20200110"]="" ["20200302"]="" ["20200319"]="" ["20200320"]="$REFDIR/MEGA_8v2_0/CCPMBiobankMEGA2_20002558X3451\83_A1.bam" )
 declare -A opts=( ["20180117"]="" ["20200110"]="-s ^8033684100" )
 
 ###########################################################################
@@ -60,3 +60,6 @@ for pfx in 20180117 20200110; do
 	$RSCRIPT --illumina --vcf $VCFOUT/$wdir.clinvar.GRCh38.bcf --chrom $chr --pos $pos --id $id --png pngs/$wdir.$id.png
     done
 done
+
+
+
