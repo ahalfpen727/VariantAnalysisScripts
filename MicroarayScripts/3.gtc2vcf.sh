@@ -4,7 +4,7 @@
 # set env variables for index locations
 ###########################################################################
 export GSADIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/GSA_Data
-export MEGADIR=/media/drew/easystore/ReferenceGenomes/MEGA_8v2_0
+export MEGADIR=/media/drew/easystore/ReferenceGenomes/GRCh38/MEGA_8v2_0
 export REFDIR=/media/drew/easystore/ReferenceGenomes/GRCh38
 export INDEXDIR=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
 export REFFA=$INDEXDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
@@ -34,7 +34,8 @@ for pfx in 20180117 20200110; do
     sam=${sam[$pfx]}
     export GSA_DIR=$GSADIR/$wdir
     cd $GSA_DIR
-    touch $wdir.$gsa.GRCh38.bcf
+    mkdir -p GTC2VCF
+    touch ./GTC2VCF/$wdir.$gsa.GRCh38.bcf
     if [ -n "$sam" ]; then
 	bcftools +gtc2vcf --no-version -Ou -f $REFFA -b "$bpm" -c $csv -e "$egt" -s "$sam"  \
 		 -g GTCs -x $pfx.sex;
@@ -43,9 +44,7 @@ for pfx in 20180117 20200110; do
 		 -x $pfx.sex;
     fi | \
     bcftools sort -Ou -T ./bcftools-sort.XXXXXX | \
-    bcftools reheader -s $wdir.gtc.tsv | \
-    bcftools norm --no-version -Ob -o $wdir.$gsa.GRCh38.bcf -f $REFFA -c x && \
-    bcftools index -f $wdir.$gsa.GRCh38.bcf
+    bcftools reheader -s $pfx.gtc.tsv | \
+    bcftools norm --no-version -Ob -o ./GTC2VCF/$wdir.$gsa.GRCh38.bcf -f $REFFA -c x && \
+    bcftools index -f ./GTC2VCF/$wdir.$gsa.GRCh38.bcf
 done
-
-
