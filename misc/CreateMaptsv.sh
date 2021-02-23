@@ -46,4 +46,5 @@ for pfx in 20180117 20200110; do
     touch $wrkdr/$wdir/dir.txt
     cd $wrkdr/$wdir
     bcftools +gtc2vcf --gtcs  GTCs -o $wdir.maps.tsv
+    cd ../
 done

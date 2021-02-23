@@ -47,20 +47,18 @@ for pfx in 20180117 20200110; do
     egt=${egt[$pfx]}
     csv=${csv[$pfx]}
     sam=${sam[$pfx]}
-    export MOCHADIR=$mocha
     export VCFDIR=BCF_and_VCF_Files
-#    export BDIR=BCF_and_VCF_Files
     cd $wdir
-    mkdir -p $MOCHADIR
+    mkdir -p $mocha
     mkdir -p $VCFDIR
     touch $wdir.pass
-    touch $MOCHADIR/$wdir.mocha.GRCh38.bcf
-    touch $MOCHADIR/$wdir.xcl.GRCh38.bcf
+    touch $mocha/$wdir.mocha.GRCh38.bcf
+    touch $mocha/$wdir.xcl.GRCh38.bcf
     bcftools annotate --no-version -Ou -x FILTER,^INFO/ALLELE_A,^INFO/ALLELE_B,^INFO/GC,^FMT/GT,^FMT/BAF,^FMT/LRR $VCFDIR/$wdir.clinvar.GRCh38.bcf |\
-	bcftools norm --no-version -d none -Ob -o $MOCHADIR/$wdir.unphased.GRCh38.bcf && \
-	bcftools index -f $MOCHADIR/$wdir.unphased.GRCh38.bcf
+	bcftools norm --no-version -d none -Ob -o $mocha/$wdir.unphased.GRCh38.bcf && \
+	bcftools index -f $mocha/$wdir.unphased.GRCh38.bcf
     
-    awk -F"\t" 'NR>1 && $21>.9 {print $1}' $wdir.maps.tsv | sed 's/\.gtc$//' | sort | join -t$'\t' - <(sort $pfx.sex) | cut -f2 >  $wdir.pass
+    awk -F"\t" 'NR>1 && $21>.9 {print $1}' $pfx.gtc.tsv | sed 's/\.gtc$//' | sort | join -t$'\t' - <(sort $pfx.sex) | cut -f2 >  $wdir.pass
     n=$(cat  $wdir.pass | wc -l);
     ns=$((n*98/100));
     print $n
@@ -68,9 +66,9 @@ for pfx in 20180117 20200110; do
 	bcftools annotate --no-version -Ou -a $REFDUP -c CHROM,FROM,TO,JK -h /dev/stdin -S $wdir.pass $VCFDIR/$wdir.unphased.GRCh38.bcf | \
 	bcftools +fill-tags --no-version -Ou -t ^Y,MT,chrY,chrM -- -t NS,ExcHet | \
 	bcftools +mochatools --no-version -Ou -- -x  $pfx.sex -G | \
-	bcftools annotate --no-version -Ob -o $MOCHADIR/$wdir.xcl.GRCh38.bcf \
+	bcftools annotate --no-version -Ob -o $mocha/$wdir.xcl.GRCh38.bcf \
 		 -i 'FILTER!="." && FILTER!="PASS" || JK<.02 || NS<'$ns' || ExcHet<1e-6 || AC_Sex_Test>6' \
-		 -x FILTER,^INFO/JK,^INFO/NS,^INFO/ExcHet,^INFO/AC_Sex_Test && bcftools index -f $MOCHADIR/$wdir.xcl.GRCh38.bcf 
+		 -x FILTER,^INFO/JK,^INFO/NS,^INFO/ExcHet,^INFO/AC_Sex_Test && bcftools index -f $mocha/$wdir.xcl.GRCh38.bcf 
     touch $mocha/$wdir.mocha.tsv
     touch $mocha/$wdir.stats.tsv
     touch $mocha/$wdir.ucsc.bed
@@ -80,7 +78,7 @@ for pfx in 20180117 20200110; do
     touch $mocha/$pfx.other.GRCh38.bcf
     bcftools view --no-version -Ob -o $mocha/$pfx.other.GRCh38.bcf -t ^$(seq -s, 1 22),X,$(seq -f chr%.0f -s, 1 22),chrX $VCFDIR/$wdir.unphased.GRCh38.bcf && \
 	bcftools index $mocha/$pfx.other.GRCh38.bcf
-    bcftools concat --no-version -Ou $MOCHADIR/$pfx.{chr{{1..22},X},other}.GRCh38.bcf | \
+    bcftools concat --no-version -Ou $mocha/$pfx.{chr{{1..22},X},other}.GRCh38.bcf | \
 	bcftools +mochatools --no-version -Ob -o $mocha/$pfx.GRCh38.bcf -- -f $REFFA && \
 	bcftools index $mocha/$wdir.GRCh38.bcf
     bcftools +mocha --no-version -Ob -o $mocha/$wdir.mocha.GRCh38.bcf --threads 1 --rules GRCh38 --variants ^$mocha/$wdir.xcl.GRCh38.bcf \
@@ -94,4 +92,5 @@ for pfx in 20180117 20200110; do
     $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8033684140 --regions chr1:145696087-248956422
     $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test2.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8033684079 --regions chr15:19847685-101991189
     $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test3.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8037702308 --regions chr12:0-56613214
+    cd ../
 done

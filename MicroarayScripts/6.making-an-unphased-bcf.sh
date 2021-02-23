@@ -2,15 +2,12 @@
 ##########################################################################
 # set env variable and link ref files
 ###########################################################################
-# see https://github.com/freeseek/mocha
-export REFDIR=/media/drew/easystore/ReferenceGenomes
-export GSADIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/GSA_Data
-export ANYLDIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/
-export ARYDIR=$ANYLDIR/VariantAnalysisScripts/MicroarayScripts/
+export ARYDIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/VariantAnalysisScripts/MicroarayScripts/
 export MOCHR=$ARYDIR/mocha_plot.R
 export GTC2VCF=$ARYDIR/gtc2vcf_plot.R
 export PILER=$ARYDIR/pileup_plot.R
 export SUMPR=$ARYDIR/summary_plot.R
+export REFDIR=/media/drew/easystore/ReferenceGenomes
 export REFIDX=$REFDIR/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set
 export REFFA=$REFIDX/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 export REFFAI=$REFIDX/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
@@ -31,13 +28,6 @@ declare -A sam=( ["20180117"]="" ["20200110"]="" ["20200302"]="" ["20200319"]=""
 ## RUN MOCHA                                                             ##
 ###########################################################################
 
-# 8033163000 8033684110 are bad quality
-# 8033673352 is 09C98633 with 11p CNN-LOH
-# 8037737797 is 305-13251 (MH0201393) with trisomy 8 rescue
-# 8037702308 is MH0145622 with ATM deletion on chromosome 11
-# 8035158042 is 352-60251 (MH0197311) with multiple chromosome 2 events
-
-
 for pfx in 20180117 20200110; do
     wdir=${wdir[$pfx]}
     gsa=${gsa[$pfx]}
@@ -48,8 +38,9 @@ for pfx in 20180117 20200110; do
     sam=${sam[$pfx]}
     cd $wdir
     mkdir -p $mocha
-    export VCFDIR=BCF_and_VCF_Files
-    bcftools annotate --no-version -Ou -x ID,QUAL,FILTER,^INFO/ALLELE_A,^INFO/ALLELE_B,^INFO/GC,^FMT/GT,^FMT/BAF,^FMT/LRR $VCFDIR/$wdir.clinvar.GRCh38.bcf |\
-	bcftools norm --no-version -d none -Ob -o $VCFDIR/$wdir.unphased.GRCh38.bcf && \
-	bcftools index -f $VCFDIR/$wdir.unphased.GRCh38.bcf
+    export VCFDIR=GTC2VCF
+    bcftools annotate --no-version -Ou -x ID,QUAL,FILTER,^INFO/ALLELE_A,^INFO/ALLELE_B,^INFO/GC,^FMT/GT,^FMT/BAF,^FMT/LRR $VCFDIR/$wdir.$gsa.GRCh38.bcf |\
+	bcftools norm --no-version -d none -Ob -o $VCFDIR/$wdir.$gsa.GRCh38.bcf && \
+	bcftools index -f $VCFDIR/$wdir.$gsa.GRCh38.bcf
+    cd ../
 done

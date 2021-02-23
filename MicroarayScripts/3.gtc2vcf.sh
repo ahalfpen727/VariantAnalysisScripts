@@ -32,8 +32,7 @@ for pfx in 20180117 20200110; do
     egt=${egt[$pfx]}
     csv=${csv[$pfx]}
     sam=${sam[$pfx]}
-    export GSA_DIR=$GSADIR/$wdir
-    cd $GSA_DIR
+    cd $wdir
     mkdir -p GTC2VCF
     touch ./GTC2VCF/$wdir.$gsa.GRCh38.bcf
     if [ -n "$sam" ]; then
@@ -44,7 +43,8 @@ for pfx in 20180117 20200110; do
 		 -x $pfx.sex;
     fi | \
     bcftools sort -Ou -T ./bcftools-sort.XXXXXX | \
-    bcftools reheader -s $pfx.gtc.tsv | \
+    bcftools reheader -s maps.tsv | \
     bcftools norm --no-version -Ob -o ./GTC2VCF/$wdir.$gsa.GRCh38.bcf -f $REFFA -c x && \
-    bcftools index -f ./GTC2VCF/$wdir.$gsa.GRCh38.bcf
+	bcftools index -f ./GTC2VCF/$wdir.$gsa.GRCh38.bcf
+    cd ../
 done
