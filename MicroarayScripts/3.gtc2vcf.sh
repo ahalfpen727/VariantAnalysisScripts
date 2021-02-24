@@ -3,7 +3,6 @@
 ###########################################################################
 # set env variables for index locations
 ###########################################################################
-export GSADIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/GSA_Data
 export MEGADIR=/media/drew/easystore/ReferenceGenomes/GRCh38/MEGA_8v2_0
 export REFDIR=/media/drew/easystore/ReferenceGenomes/GRCh38
 export INDEXDIR=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
@@ -37,14 +36,18 @@ for pfx in 20180117 20200110; do
     touch ./GTC2VCF/$wdir.$gsa.GRCh38.bcf
     if [ -n "$sam" ]; then
 	bcftools +gtc2vcf --no-version -Ou -f $REFFA -b "$bpm" -c $csv -e "$egt" -s "$sam"  \
-		 -g GTCs -x $pfx.sex;
+		 -g GTCs -x $pfx.sex | \
+	    bcftools sort -Ou -T ./bcftools-sort.XXXXXX | \
+	    bcftools reheader -s $wdir.maps.tsv | \
+	    bcftools norm --no-version -Ob -o ./GTC2VCF/$wdir.$gsa.GRCh38.bcf -f $REFFA -c x && \
+	    bcftools index -f ./GTC2VCF/$wdir.$gsa.GRCh38.bcf
     else
 	bcftools +gtc2vcf --no-version -Ou -f $REFFA -b "$bpm" -c $csv -e "$egt" -g GTCs  \
-		 -x $pfx.sex;
-    fi | \
-    bcftools sort -Ou -T ./bcftools-sort.XXXXXX | \
-    bcftools reheader -s maps.tsv | \
-    bcftools norm --no-version -Ob -o ./GTC2VCF/$wdir.$gsa.GRCh38.bcf -f $REFFA -c x && \
-	bcftools index -f ./GTC2VCF/$wdir.$gsa.GRCh38.bcf
+		 -x $pfx.sex | \
+	    bcftools sort -Ou -T ./bcftools-sort.XXXXXX | \
+	    bcftools reheader -s $wdir.maps.tsv | \
+	    bcftools norm --no-version -Ob -o ./GTC2VCF/$wdir.$gsa.GRCh38.bcf -f $REFFA -c x && \
+	    bcftools index -f ./GTC2VCF/$wdir.$gsa.GRCh38.bcf
+    fi
     cd ../
 done

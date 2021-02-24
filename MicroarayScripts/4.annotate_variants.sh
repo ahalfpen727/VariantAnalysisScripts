@@ -44,7 +44,7 @@ for pfx in 20180117 20200110; do
 		 -b -l -n 128 && bcftools index -f  $VCFOUT/$wdir.$gsa.csq.GRCh38.bcf
     export list2="VARIATIONID,EXAC_AF:=AF_EXAC,CLNDN,CLNSIG,GENEINFO,MC,RS"
     echo $list2
-    bcftools annotate --no-version -Ob -a $CLINVCF -c $list2  $VCFOUT/$wdir.$gsa.csq.GRCh38.bcf \
-	     -o  $VCFOUT/$wdir.clinvar.GRCh38.bcf && bcftools index -f  $VCFOUT/$wdir.clinvar.GRCh38.bcf
+    bcftools annotate --no-version -Ob -o  $VCFOUT/$wdir.clinvar.GRCh38.bcf -a $CLINVCF -c $list2  $VCFOUT/$wdir.$gsa.csq.GRCh38.bcf && \
+	bcftools index -f  $VCFOUT/$wdir.clinvar.GRCh38.bcf
     cd ../
 done

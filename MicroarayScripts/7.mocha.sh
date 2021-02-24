@@ -12,6 +12,7 @@ export MOCHR=$ARYDIR/mocha_plot.R
 export GTC2VCF=$ARYDIR/gtc2vcf_plot.R
 export PILER=$ARYDIR/pileup_plot.R
 export SUMPR=$ARYDIR/summary_plot.R
+export CLINVAR=$REFDIR/GRCh38/ClinVar/clinvar_20200810.GRCh38.vcf.gz
 export REFIDX=$REFDIR/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set
 export REFFA=$REFIDX/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 export REFFAI=$REFIDX/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
@@ -55,8 +56,8 @@ for pfx in 20180117 20200110; do
     touch $mocha/$wdir.mocha.GRCh38.bcf
     touch $mocha/$wdir.xcl.GRCh38.bcf
     bcftools annotate --no-version -Ou -x FILTER,^INFO/ALLELE_A,^INFO/ALLELE_B,^INFO/GC,^FMT/GT,^FMT/BAF,^FMT/LRR $VCFDIR/$wdir.clinvar.GRCh38.bcf |\
-	bcftools norm --no-version -d none -Ob -o $mocha/$wdir.unphased.GRCh38.bcf && \
-	bcftools index -f $mocha/$wdir.unphased.GRCh38.bcf
+	bcftools norm --no-version -d none -Ob -o $VCFDIR/$wdir.unphased.GRCh38.bcf && \
+	bcftools index -f $VCFDIR/$wdir.unphased.GRCh38.bcf
     
     awk -F"\t" 'NR>1 && $21>.9 {print $1}' $pfx.gtc.tsv | sed 's/\.gtc$//' | sort | join -t$'\t' - <(sort $pfx.sex) | cut -f2 >  $wdir.pass
     n=$(cat  $wdir.pass | wc -l);

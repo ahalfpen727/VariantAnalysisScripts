@@ -2,19 +2,20 @@
 ##########################################################################
 # set env variable and link ref files
 ###########################################################################
-export ARYDIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/VariantAnalysisScripts/MicroarayScripts/
-export MOCHR=$ARYDIR/mocha_plot.R
-export GTC2VCF=$ARYDIR/gtc2vcf_plot.R
-export PILER=$ARYDIR/pileup_plot.R
-export SUMPR=$ARYDIR/summary_plot.R
-export REFDIR=/media/drew/easystore/ReferenceGenomes
-export REFIDX=$REFDIR/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set
-export REFFA=$REFIDX/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
-export REFFAI=$REFIDX/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
-export REFMAP=$REFDIR/GRCh38/genetic_map_hg38_withX.gz
-export REFDUP=$REFDIR/GRCh38/dup.grch38.bed.gz
-export REFCNP=$REFDIR/GRCh38/cnp.grch38.bed.gz
-export REFCYTO=$REFDIR/GRCh38/cytoBand.hg38.txt.gz
+export REFDIR=/media/drew/easystore/ReferenceGenomes/GRCh38
+export REFIDX=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
+export REFFA=$REFIDX/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+export REFFAI=$REFIDX/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
+export REFMAP=$REFDIR/genetic_map_hg38_withX.gz
+export REFDUP=$REFDIR/dup.grch38.bed.gz
+export REFCNP=$REFDIR/cnp.grch38.bed.gz
+export REFCYTO=$REFDIR/cytoBand.hg38.txt.gz
+export ANALYSIS=/media/drew/easystore/Current-Analysis/AnalysisBaseDir
+export SCRIPTDIR=$ANALYSIS/VariantAnalysisScripts/MicroarayScripts/
+export MOCHR=$SCRIPTDIR/mocha_plot.R
+export GTC2VCF=$SCRIPTDIR/gtc2vcf_plot.R
+export PILER=$SCRIPTDIR/pileup_plot.R
+export SUMPR=$SCRIPTDIR/summary_plot.R
 
 declare -A gsa=(  ["20180117"]="GSA-24v1_0"  ["20200110"]="GSA_24v2_0" )
 declare -A mocha=(  ["20180117"]="Mocha_out"  ["20200110"]="Mocha_out" )
