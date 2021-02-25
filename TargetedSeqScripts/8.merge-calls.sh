@@ -5,14 +5,13 @@
 ###########################################################################
 
 export GATK=$HOME/toolbin/gatk-4.1.9.0/gatk
-export REFDIR=/media/drew/easystore/ReferenceGenomes/
+export REFDIR=/media/drew/easystore/ReferenceGenomes/GRCh38
 export BEDDIR=$REFDIR/BEDs
 export BEDFILE=$BEDDIR/3215481_Covered.GRCh38.bed
 export IDXDIR=$REFDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set
 export REFFA=$IDXDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 export REFFAI=$IDXDIR/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
-export WORKDIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/MiSeq_Data
-cd $WORKDIR
+
 ###########################################################################
 ## COMPUTE COVERAGE OVER TARGETS                                         ##
 ###########################################################################
@@ -25,19 +24,19 @@ for pfx in 2019_09 2019_12; do
     miseqdir=${miseqdir[$pfx]}
     mutect=${mutect[$pfx]}
     mutect2=${mutect2[$pfx]}
-    cd $miseqdir
-    pwd
-    export OUTPUT=$mutect/$mutect2
-    cd $OUTPUT
-    pwd
-    export INPUT_FILE=../../sm.txt
+    cd $miseqdir/$mutect
+    mkdir -p VCFs
+    mkdir -p $mutect2
+    mv {Haplotype-Caller,Mutect2_out}/{hc,m2}.*.GRCh38.vcf.gz{,.tbi,.stats} VCFs/
+    export OUTPUT=$mutect2
+    export INPUT_FILE=../sm.txt
     sm_arr=( $(cat $INPUT_FILE) )
     inpt=${sm_arr[@]}
     for pfx in hc m2; do
-	input=$(echo $inpt | sed 's/ /.GRCh38.vcf.gz vcfs\/'$pfx'./g;s/^/vcfs\/'$pfx'./;s/$/.GRCh38.vcf.gz/')
+	input=$(echo $inpt | sed 's/ /.GRCh38.vcf.gz VCFs\/'$pfx'./g;s/^/VCFs\/'$pfx'./;s/$/.GRCh38.vcf.gz/')
 	bcftools merge --no-version -Ou $input | \
 	    bcftools norm --no-version -Ou -m -any  | \
-	    bcftools norm --no-version -Ob -o $pfx.GRCh38.bcf -f $REFFA && \
-	    bcftools index -f $pfx.GRCh38.bcf
+	    bcftools norm --no-version -Ob -o $OUTPUT/$pfx.GRCh38.bcf -f $REFFA && \
+	    bcftools index -f $OUTPUT/$pfx.GRCh38.bcf
     done
 done

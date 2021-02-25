@@ -3,7 +3,7 @@
 ##########################################################################
 # set env variable and link ref files
 ###########################################################################
-
+    
 export REFDIR=/media/drew/easystore/ReferenceGenomes
 export REFIDX=$REFDIR/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set
 export REFFA=$REFIDX/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
@@ -38,13 +38,12 @@ for pfx in 20180117 20200110; do
     export VCFOUT=BCF_and_VCF_Files
     export INDIR=GTC2VCF
     export list1="KGP_AF:=AF,EAS_AF,EUR_AF,AFR_AF,AMR_AF,SAS_AF"
-    echo $list1
+    export list2="EXAC_AF:=AF_EXAC,CLNDN,CLNSIG,GENEINFO,MC,RS"
     bcftools annotate --no-version -Ou -a $ALLBCF -c $list1 $INDIR/$wdir.$gsa.GRCh38.bcf | \
-	bcftools csq --no-version -Ob -o $VCFOUT/$wdir.$gsa.csq.GRCh38.bcf -f $REFFA -g $REFGFF \
-		 -b -l -n 128 && bcftools index -f  $VCFOUT/$wdir.$gsa.csq.GRCh38.bcf
-    export list2="VARIATIONID,EXAC_AF:=AF_EXAC,CLNDN,CLNSIG,GENEINFO,MC,RS"
-    echo $list2
-    bcftools annotate --no-version -Ob -o  $VCFOUT/$wdir.clinvar.GRCh38.bcf -a $CLINVCF -c $list2  $VCFOUT/$wdir.$gsa.csq.GRCh38.bcf && \
+	bcftools csq --no-version -Ob -o $VCFOUT/$wdir.$gsa.csq.GRCh38.bcf -f $REFFA -g $REFGFF -b -l -n 128 && \
+	bcftools index -f  $VCFOUT/$wdir.$gsa.csq.GRCh38.bcf
+    bcftools annotate --no-version -Ob -o $VCFOUT/$wdir.clinvar.GRCh38.bcf -a $CLINVCF -c $list2  $VCFOUT/$wdir.$gsa.csq.GRCh38.bcf && \
 	bcftools index -f  $VCFOUT/$wdir.clinvar.GRCh38.bcf
     cd ../
 done
+

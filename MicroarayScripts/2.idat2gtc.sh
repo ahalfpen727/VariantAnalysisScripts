@@ -18,7 +18,7 @@ for pfx in 20180117 20200110; do
     bpm=${bpms[$pfx]}
     egt=${egts[$pfx]}
     mkdir -P ./$dir/GTCs
-    iaap_gencall $bpm $egt $dr/GTCs -f $dr/Raw_Data/ -g
+    $HOME/toolbin/iaap-cli/iaap gencall $bpm $egt $dr/GTCs -f $dr/Raw_Data/ -g
     bcftools +gtc2vcf --gtcs  $dr/GTCs -o $dr/$pfx.gtc.tsv
 done
 

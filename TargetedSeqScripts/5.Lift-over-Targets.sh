@@ -9,7 +9,3 @@ export NEWBED=$BEDDIR/3215481_Covered.GRCh38.bed
 
 grep ^chr $BEDFILE > $MAPCHAIN
 $HOME/toolbin/liftOver $MAPCHAIN $LIFTOVER $NEWBED /dev/stderr
-#   liftOver oldFile map.chain newFile unMapped
-
-grep ^chr 3215481_Covered.bed /home/drew/toolbin/liftOver /dev/stdin \
-     ../GRCh38/hg19ToHg38.over.chain.gz  3215481_Covered.GRCh38.new.bed

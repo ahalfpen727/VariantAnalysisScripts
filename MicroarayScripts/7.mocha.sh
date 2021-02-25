@@ -1,11 +1,10 @@
 #!bin/bash
+
 ##########################################################################
 # set env variable and link ref files
 ###########################################################################
-# see https://github.com/freeseek/mocha
 export REFDIR=/media/drew/easystore/ReferenceGenomes
 export MOCHADIR=$REFDIR/GRCh38/Mocha_Files
-export GSADIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/GSA_Data
 export ANYLDIR=/media/drew/easystore/Current-Analysis/AnalysisBaseDir/
 export ARYDIR=$ANYLDIR/VariantAnalysisScripts/MicroarayScripts/
 export MOCHR=$ARYDIR/mocha_plot.R
@@ -14,8 +13,8 @@ export PILER=$ARYDIR/pileup_plot.R
 export SUMPR=$ARYDIR/summary_plot.R
 export CLINVAR=$REFDIR/GRCh38/ClinVar/clinvar_20200810.GRCh38.vcf.gz
 export REFIDX=$REFDIR/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set
-export REFFA=$REFIDX/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
-export REFFAI=$REFIDX/GRCh38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
+export REFFA=$REFIDX/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+export REFFAI=$REFIDX/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai
 export REFMAP=$REFDIR/GRCh38/genetic_map_hg38_withX.gz
 export REFDUP=$REFDIR/GRCh38/dup.grch38.bed.gz
 export REFCNP=$REFDIR/GRCh38/cnp.grch38.bed.gz
@@ -33,13 +32,6 @@ declare -A sam=( ["20180117"]="" ["20200110"]="" ["20200302"]="" ["20200319"]=""
 ## RUN MOCHA                                                             ##
 ###########################################################################
 
-# 8033163000 8033684110 are bad quality
-# 8033673352 is 09C98633 with 11p CNN-LOH
-# 8037737797 is 305-13251 (MH0201393) with trisomy 8 rescue
-# 8037702308 is MH0145622 with ATM deletion on chromosome 11
-# 8035158042 is 352-60251 (MH0197311) with multiple chromosome 2 events
-
-
 for pfx in 20180117 20200110; do
     wdir=${wdir[$pfx]}
     gsa=${gsa[$pfx]}
@@ -48,17 +40,21 @@ for pfx in 20180117 20200110; do
     egt=${egt[$pfx]}
     csv=${csv[$pfx]}
     sam=${sam[$pfx]}
-    export VCFDIR=BCF_and_VCF_Files
     cd $wdir
+    export VCFDIR=BCF_and_VCF_Files
     mkdir -p $mocha
     mkdir -p $VCFDIR
     touch $wdir.pass
-    touch $mocha/$wdir.mocha.GRCh38.bcf
-    touch $mocha/$wdir.xcl.GRCh38.bcf
-    bcftools annotate --no-version -Ou -x FILTER,^INFO/ALLELE_A,^INFO/ALLELE_B,^INFO/GC,^FMT/GT,^FMT/BAF,^FMT/LRR $VCFDIR/$wdir.clinvar.GRCh38.bcf |\
-	bcftools norm --no-version -d none -Ob -o $VCFDIR/$wdir.unphased.GRCh38.bcf && \
-	bcftools index -f $VCFDIR/$wdir.unphased.GRCh38.bcf
-    
+    export xlist="ID,QUAL,^INFO/ALLELE_A,^INFO/ALLELE_B,^INFO/GC,^FMT/GT,^FMT/BAF,^FMT/LRR"
+    bcftools annotate --no-version -Ob -o $VCFDIR/$pfx.unphased.bcf $VCFDIR/$wdir.clinvar.GRCh38.bcf -x $xlist  && \
+        bcftools index -f $VCFDIR/$pfx.unphased.bcf
+    bcftools view --no-version -h $VCFDIR/$wdir.clinvar.GRCh38.bcf | sed 's/^\(##FORMAT=<ID=AD,Number=\)\./\1R/' | \
+        bcftools reheader -h /dev/stdin $VCFDIR/$wdir.clinvar.GRCh38.bcf | \
+        bcftools filter --no-version -Ou -e "FMT/DP<10 | FMT/GQ<20" --set-GT . | \
+        bcftools annotate --no-version -Ou -x ID,QUAL,^INFO/GC,^FMT/GT,^FMT/AD | \
+        bcftools norm --no-version -Ou -m -any --keep-sum AD | \
+        bcftools norm --no-version -Ob -o $VCFDIR/$pfx.unphased.bcf -f $REFFA && \
+        bcftools index -f $VCFDIR/$pfx.unphased.bcf
     awk -F"\t" 'NR>1 && $21>.9 {print $1}' $pfx.gtc.tsv | sed 's/\.gtc$//' | sort | join -t$'\t' - <(sort $pfx.sex) | cut -f2 >  $wdir.pass
     n=$(cat  $wdir.pass | wc -l);
     ns=$((n*98/100));
@@ -95,3 +91,5 @@ for pfx in 20180117 20200110; do
     $MOCHR --mocha --cytoband $REFCYTO --png /tmp/test3.png --vcf $mocha/$wdir.mocha.GRCh38.bcf --samples 8037702308 --regions chr12:0-56613214
     cd ../
 done
+
+
