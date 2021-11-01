@@ -1,6 +1,5 @@
 # Variant Calling Workflows
-This repository contains several variant calling workflows. The workflows are designed to identify variants from sequence data produced by several different types of NGS techonologies. The pipelines follow the rigorous standards described in the refernce materail associated with the
-![Genome Analysis Toolkit](https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/best-practices-workflows) and the same general workflow depicted below:
+This repository contains several variant calling workflows. The workflows are designed to identify variants from sequence data produced by several different types of NGS techonologies. The pipelines follow the rigorous standards described in the refernce material associated with the Genome Analysis Toolkit at  https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/best-practices-workflows  and the same general workflow depicted below:
 
 ![](misc/Pipeline-Images/variant_calling_workflow.png)
 
